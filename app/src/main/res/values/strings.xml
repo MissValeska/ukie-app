@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">UKIE</string>
+    <string name="action_settings">Settings</string>
+    <string name="facebook_app_id">186082978515573</string>
+    <string name="title_activity_exercises">Exercises</string>
+    <string name="title_activity_badges">Badges</string>
+    <string name="title_activity_friends">Friends</string>
+    <string name="title_activity_forums">ForumsActivity</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_report">ReportActivity</string>
+
+</resources>
