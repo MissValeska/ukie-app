@@ -69,6 +69,24 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ukie.ukie.MainActivity" />
         </activity>
+        <activity
+            android:name=".Questions"
+            android:label="@string/title_activity_questions"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ukie.ukie.MainActivity" />
+        </activity>
+        <activity
+            android:name=".google_login"
+            android:label="@string/title_activity_google_login"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ukie.ukie.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

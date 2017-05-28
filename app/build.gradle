@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
+    useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "com.ukie.ukie"
         minSdkVersion 21
@@ -15,7 +16,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+
         }
+    }
+}
+
+allprojects {
+    repositories {
+        // ...
+        maven { url 'https://maven.fabric.io/public' }
     }
 }
 
@@ -33,7 +43,19 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.google.android.gms:play-services-auth:10.2.6'
+    compile 'com.google.firebase:firebase-appindexing:10.2.6'
+    compile 'com.google.firebase:firebase-ads:10.2.6'
+    compile 'com.google.firebase:firebase-database:10.2.6'
+    compile 'com.google.firebase:firebase-core:10.2.6'
     compile 'com.google.firebase:firebase-auth:10.2.6'
+    // FirebaseUI Database only
+    compile 'com.firebaseui:firebase-ui-database:1.2.0'
+
+    // FirebaseUI Storage only
+    compile 'com.firebaseui:firebase-ui-storage:1.2.0'
+
+    // Single target that includes all FirebaseUI libraries above
+    compile 'com.firebaseui:firebase-ui:1.2.0'
     testCompile 'junit:junit:4.12'
 }
 

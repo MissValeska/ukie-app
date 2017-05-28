@@ -74,11 +74,5 @@
             app:menu="@menu/drawer_view" />
     </android.support.v4.widget.DrawerLayout>
 
-    <fragment
-        android:name="com.ukie.ukie.ForumsFragment"
-        android:id="@+id/fragment_place"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
 
 </android.support.design.widget.CoordinatorLayout>

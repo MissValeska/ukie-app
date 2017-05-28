@@ -8,5 +8,7 @@
     <string name="title_activity_forums">ForumsActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activity_report">ReportActivity</string>
+    <string name="title_activity_questions">Questions</string>
+    <string name="title_activity_google_login">google_login</string>
 
 </resources>

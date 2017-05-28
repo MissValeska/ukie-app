@@ -189,13 +189,13 @@ public class MainActivity extends AppCompatActivity {
     public void selectDrawerItem(IDrawerItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         Intent intent;
-        Fragment fragment = null;
-        Class fragmentClass = null;
+        //Fragment fragment = null;
+        //Class fragmentClass = null;
         // !! Prevent going to any activity if the user is already there, and simply close the drawer
         switch((int) menuItem.getIdentifier()) {
             case 1: // !! Add profile activity
-                /*intent = new Intent(this, MainActivity.class);
-                startActivity(intent);*/
+                intent = new Intent(this, google_login.class);
+                startActivity(intent);
                 break;
              case 2:
                 intent = new Intent(this, MainActivity.class);
@@ -210,15 +210,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case 5:
-                fragmentClass = FriendsFragment.class;
-                //intent = new Intent(this, Friends.class);
-                //startActivity(intent);
+                //fragmentClass = FriendsFragment.class;
+                intent = new Intent(this, Friends.class);
+                startActivity(intent);
                 break;
             case 6:
-                fragmentClass = ForumsFragment.class;
+                //fragmentClass = ForumsFragment.class;
                 //setContentView(R.layout.fragment_forums);
-                //intent = new Intent(this, ForumsActivity.class);
-                //startActivity(intent);
+                intent = new Intent(this, ForumsActivity.class);
+                startActivity(intent);
                 break;
             case 7:
                 intent = new Intent(this, SettingsActivity.class);
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
         }
 
-        try {
+        /*try {
             fragment = (Fragment) fragmentClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Insert the fragment by replacing any existing fragment
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragment_place, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragment_place, fragment).commit();*/
 
         // Highlight the selected item has been done by NavigationView
         //menuItem.setChecked(true);
