@@ -37,6 +37,7 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.9.1@aar') {
         transitive = true
     }
+    compile 'com.mikepenz:itemanimators:0.2.4@aar'
     compile 'com.mikepenz:iconics-core:2.8.5@aar'
     compile 'com.mikepenz:google-material-typeface:3.0.1.0.original@aar'
     compile 'com.android.support:design:25.3.1'

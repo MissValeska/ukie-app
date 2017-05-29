@@ -33,7 +33,6 @@
         android:layout_height="40dp"
         android:layout_above="@+id/editText"
         android:layout_centerHorizontal="true"
-        android:text="Conjugate жити for ти"
         android:textSize="18sp" />
 
     <ProgressBar
@@ -54,4 +53,31 @@
         android:layout_marginTop="83dp"
         android:id="@+id/checkedTextView"
         android:checked="false" />
+
+    <TextView
+        android:id="@+id/Infin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/checkedTextView"
+        android:layout_toStartOf="@+id/textView2"
+        android:text="жити"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/Conj"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/Infin"
+        android:layout_below="@+id/Infin"
+        android:text="живеш"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/ConjType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/Conj"
+        android:layout_below="@+id/Conj"
+        android:text="ти"
+        android:visibility="gone" />
 </RelativeLayout>

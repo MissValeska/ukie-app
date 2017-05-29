@@ -13,6 +13,15 @@
     tools:context="com.ukie.ukie.google_login"
     tools:showIn="@layout/activity_google_login">
 
+    <TextView
+        android:id="@+id/status"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAlignment="center"
+        android:layout_marginTop="20dp" />
+
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"

@@ -22,17 +22,17 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_menu_send"
-        app:layout_anchor="@+id/include3"
-        app:layout_anchorGravity="bottom|right" />
-
     <include layout="@layout/content_questions"
         android:id="@+id/include3" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:backgroundTint="@color/md_amber_600"
+        android:text="Check"
+        app:layout_anchor="@+id/include3"
+        app:layout_anchorGravity="bottom|center_horizontal" />
 
 </android.support.design.widget.CoordinatorLayout>
