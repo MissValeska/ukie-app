@@ -18,6 +18,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.ui.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,6 +41,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import static com.ukie.ukie.R.color.md_amber_600;
 import static com.ukie.ukie.R.color.md_red_800;
@@ -62,16 +71,17 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
     }*/
 
-    private DatabaseReference myRef;
+    //private DatabaseReference myRef;
     private static final String TAG = "SignInActivity";
 
-    TextView QuestionText = (TextView) findViewById(R.id.textView2);
+    //TextView QuestionText = (TextView) findViewById(R.id.textView2);
 
     Button checkBtn = (Button) findViewById(R.id.button2);
 
-    TextView Infin = (TextView) findViewById(R.id.Infin);
-    TextView Conj = (TextView) findViewById(R.id.Conj);
-    TextView ConjType = (TextView) findViewById(R.id.ConjType);
+    StringRequest stringRequest; // Assume this exists.
+    RequestQueue mRequestQueue;  // Assume this exists.
+
+    String url ="https://ukie.herokuapp.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,45 +125,10 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
             }
         });*/
 
+        mRequestQueue = Volley.newRequestQueue(this);
+
     }
 
-    public String serverConnect(String url) {
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet(url);
-        String line = null;
-        try {
-            HttpResponse response = httpclient.execute(httpget);
-            if(response != null) {
-                InputStream inputstream = response.getEntity().getContent();
-                line = convertStreamToString(inputstream);
-                Toast.makeText(this, line, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Unable to complete your request", Toast.LENGTH_LONG).show();
-            }
-        } catch (ClientProtocolException e) {
-            Toast.makeText(this, "Caught ClientProtocolException", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            Toast.makeText(this, "Caught IOException", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, "Caught Exception", Toast.LENGTH_SHORT).show();
-        }
-
-        return line;
-    }
-
-    public String convertStreamToString(InputStream is) {
-        String line = null;
-        StringBuilder total = new StringBuilder();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        try {
-            while ((line = rd.readLine()) != null) {
-                total.append(line);
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, "Stream Exception", Toast.LENGTH_SHORT).show();
-        }
-        return total.toString();
-    }
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -168,7 +143,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
             String tmp = ((EditText) v).getText().toString();
 
-            if (tmp.compareToIgnoreCase(String.valueOf(Conj.getText())) == 0) {
+            /*if (tmp.compareToIgnoreCase(String.valueOf(getConjugation())) == 0) {
                 textView1.setText("Correct!");
                 textView1.setChecked(true);
                 //textView1.setTextColor(100);
@@ -176,16 +151,62 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                     prog.setProgress(prog.getProgress() + 1);
                 }
             } else {
-                textView1.setText("That's incorrect, the correct conjugation for " + ConjType.getText() + " of " + Infin.getText() + " is \"" + Conj.getText() + "\"");
+                textView1.setText("That's incorrect, the correct conjugation for " + getConjType() + " of " + getInfinitive() + " is \"" + getConjugation() + "\"");
                 textView1.setChecked(false);
                 checkBtn.setBackgroundColor(getResources().getColor(md_red_800));
                 //textView1.setTextColor(500);
                 if (prog.getProgress() != 0) {
                     prog.setProgress(prog.getProgress() - 1);
                 }
-            }
+            }*/
         }
             return false;
+    }
+
+    public String getConjugation() {
+        return serverRequest("/conj");
+    }
+
+    public String getConjType() {
+        return serverRequest("/conjtype");
+    }
+
+    public String getInfinitive() {
+        return serverRequest("/infin");
+    }
+
+    public String serverRequest(String req) {
+
+        final StringBuilder res = null;
+
+        // Request a string response from the provided URL.
+        stringRequest = new StringRequest(Request.Method.GET, url + req,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        //mTextView.setText("Response is: "+ response);
+                        res.append(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //mTextView.setText("That didn't work!");
+            }
+        });
+        // Add the request to the RequestQueue.
+        stringRequest.setTag(TAG);
+        mRequestQueue.add(stringRequest);
+
+        return res.toString();
+    }
+
+    @Override
+    protected void onStop () {
+        super.onStop();
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(TAG);
+        }
     }
 
 }
