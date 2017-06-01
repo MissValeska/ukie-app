@@ -25,6 +25,11 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -42,17 +47,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class Exercises extends AppCompatActivity {
 
     private static final String TAG = "SignInActivity";
 
-    StringRequest stringRequest; // Assume this exists.
-    RequestQueue mRequestQueue;  // Assume this exists.
-
-    String[] list = new String[3];
-
     String url ="https://ukie.herokuapp.com/";
+
+    ArrayList<String> data = new ArrayList<String>();
+
+    int QuestionCount = 0;
+    int ExerciseCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,146 +72,59 @@ public class Exercises extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Questions.class);
-                startActivity(intent);
-            }
-        });
+                DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
-        mRequestQueue = Volley.newRequestQueue(this);
-        //Log.w(TAG,"That's incorrect, the correct conjugation for " + getConjType() + " of " + getInfinitive() + " is \"" + getConjugation() + "\"");
-
-        /**
-         * Method to make json object request where json response starts wtih {
-         * */
-        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
-                url, null, new Response.Listener<JSONObject>() {
-
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d(TAG, response.toString());
-
-                try {
-                    // Parsing json object response
-                    // response will be a json object
-                    String conj = response.getString("conj");
-                    String conjtype = response.getString("conjtype");
-                    String infin = response.getString("infin");
-                    Log.w(TAG,"Stuff:" + conj);
-                    /*JSONObject phone = response.getJSONObject("phone");
-                    String home = phone.getString("home");
-                    String mobile = phone.getString("mobile");*/
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),
-                            "Error: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.d(TAG, "Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Request a string response from the provided URL.
-       /* stringRequest = new StringRequest(Request.Method.GET, url + "/conj",
-                new Response.Listener<String>() {
+                FirebaseRef.addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        //mTextView.setText("Response is: "+ response);
-                        Log.w(TAG,"Stuff:" + response);
+                    public void onDataChange(DataSnapshot snapshot) {
+                        Log.w(TAG, snapshot.getValue().toString());
+                        Intent intent = new Intent(getApplicationContext(), Questions.class);
+                        JSONObject tmp = null;
+                        try {
+                            tmp = new JSONObject(snapshot.getValue().toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            ExerciseCount = tmp.getInt("ExerciseNum");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        for (int d = 1; d <= ExerciseCount; d++) {
+                                try {
+                                    QuestionCount = (tmp.getJSONObject("Exercise" + String.valueOf(d)).getInt("QuestionNum"));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                for (int i = 1; i <= QuestionCount; i++) {
+                                    try {
+                                        data.add((tmp.getJSONObject("Exercise" + String.valueOf(d))).getJSONObject("Question" + String.valueOf(i)).toString());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Log.w(TAG, "HAI");
+                                }
+                            }
+                        intent.putStringArrayListExtra("data", data);
+                        intent.putExtra("count", QuestionCount);
+                        intent.putExtra("index", 0);
+                        intent.putExtra("progress", 0);
+                        startActivity(intent);
+
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //mTextView.setText("That didn't work!");
-            }
-        });*/
-        // Add the request to the RequestQueue.
-        stringRequest.setTag(TAG);
-        mRequestQueue.add(jsonObjReq);
-        /*final TextView outputText = (TextView) findViewById(R.id.textView4);
 
-        AsyncTask task = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] params) {
-                while(stringRequest.hasHadResponseDelivered() != true) {
-
-                }
-                //outputText.setText();
-                return null;
-            }
-        }.execute();*/
-
-        //setConjugation();
-        //setConjType();
-        //setInfinitive();
-
-        //Log.w(TAG,"That's incorrect, the correct conjugation for " + getConjType() + " of " + getInfinitive() + " is \"" + getConjugation() + "\"");
-
-
-        //serverGET("http://192.168.0.135:3000/infin");
-
-    }
-
-    public String getConjugation() {
-        return list[0];
-    }
-
-    public String getConjType() {
-        return list[1];
-    }
-
-    public String getInfinitive() {
-        return list[2];
-    }
-
-    public void setConjugation() {
-        serverRequest("/conj", 0);
-    }
-
-    public void setConjType() {
-        serverRequest("/conjtype", 1);
-    }
-
-    public void setInfinitive() {
-        serverRequest("/infin", 2);
-    }
-
-    public void serverRequest(String req, final int i) {
-
-        // Request a string response from the provided URL.
-        stringRequest = new StringRequest(Request.Method.GET, url + req,
-                new Response.Listener<String>() {
                     @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        //mTextView.setText("Response is: "+ response);
-                        list[i] = response;
+                    public void onCancelled(DatabaseError databaseError) {
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //mTextView.setText("That didn't work!");
+                });
             }
         });
-        // Add the request to the RequestQueue.
-        stringRequest.setTag(TAG);
-        mRequestQueue.add(stringRequest);
+
     }
 
     @Override
     protected void onStop () {
         super.onStop();
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(TAG);
-        }
     }
 
 }
