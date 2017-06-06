@@ -9,18 +9,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.picasso.Picasso;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private DrawerLayout mDrawer;
-    private Toolbar toolbar;
-    private NavigationView nvDrawer;
-
-    // Make sure to be using android.support.v7.app.ActionBarDrawerToggle version.
-    // The android.support.v4.app.ActionBarDrawerToggle has been deprecated.
-    private ActionBarDrawerToggle drawerToggle;
+    private static final String TAG = "SignInActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,75 +29,23 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // !! Make this into an image button (hopefully it won't crash)
+        ImageButton imgBtn = (ImageButton) findViewById(R.id.profileImgButton);
 
-        // Set a Toolbar to replace the ActionBar.
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        // Find our drawer view
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        Log.d(TAG, String.valueOf(mAuth.getCurrentUser()));
 
-        nvDrawer = (NavigationView) findViewById(R.id.nvView);
-        // Setup drawer view
-        setupDrawerContent(nvDrawer);
-
-    }
-
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        selectDrawerItem(menuItem);
-                        return true;
-                    }
-                });
-    }
-
-    public void selectDrawerItem(MenuItem menuItem) {
-        // Create a new fragment and specify the fragment to show based on nav item clicked
-        Intent intent;
-        // !! Prevent going to any activity if the user is already there, and simply close the drawer
-        switch(menuItem.getItemId()) {
-            case R.id.nav_dashboard:
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_exercises:
-                intent = new Intent(this, Exercises.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_badges:
-                intent = new Intent(this, Friends.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_friends:
-                intent = new Intent(this, Friends.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_forums:
-                intent = new Intent(this, ForumsActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_settings:
-                intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_report:
-                intent = new Intent(this, ReportActivity.class);
-                startActivity(intent);
-                break;
-            default: // !! Examine more later
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+        if(mAuth.getCurrentUser() != null) {
+            Picasso.with(imgBtn.getContext()).load(mAuth.getCurrentUser().getPhotoUrl()).into(imgBtn);
+        }
+        else {
+            Toast.makeText(this, "You are not signed in, please go sign in now.",
+                    Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(this, google_login.class);
+            startActivity(intent);
         }
 
-        // Highlight the selected item has been done by NavigationView
-        menuItem.setChecked(true);
-        // Set action bar title
-        setTitle(menuItem.getTitle());
-        // Close the navigation drawer
-        mDrawer.closeDrawers();
     }
 
 }

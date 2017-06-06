@@ -9,18 +9,33 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class ForumsActivity extends AppCompatActivity {
 
-    private DrawerLayout mDrawer;
-    private Toolbar toolbar;
-    private NavigationView nvDrawer;
+    private static final String TAG = "SignInActivity";
 
-    // Make sure to be using android.support.v7.app.ActionBarDrawerToggle version.
-    // The android.support.v4.app.ActionBarDrawerToggle has been deprecated.
-    private ActionBarDrawerToggle drawerToggle;
+    private FirebaseAuth mAuth;
+
+    DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,74 +44,47 @@ public class ForumsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Set a Toolbar to replace the ActionBar.
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mAuth = FirebaseAuth.getInstance();
 
-        // Find our drawer view
-        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if(mAuth.getCurrentUser() != null) {
 
-        nvDrawer = (NavigationView) findViewById(R.id.nvView);
-        // Setup drawer view
-        setupDrawerContent(nvDrawer);
-
-    }
-
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        selectDrawerItem(menuItem);
-                        return true;
+            FirebaseRef.child("forums").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    Log.w(TAG, snapshot.getValue().toString());
+                    JSONObject tmp = null;
+                    ArrayList<String> strArr = new ArrayList<String>();
+                    try {
+                        tmp = new JSONObject(snapshot.getValue().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                });
-    }
 
-    public void selectDrawerItem(MenuItem menuItem) {
-        // Create a new fragment and specify the fragment to show based on nav item clicked
-        Intent intent;
-        // !! Prevent going to any activity if the user is already there, and simply close the drawer
-        switch(menuItem.getItemId()) {
-            case R.id.nav_dashboard:
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_exercises:
-                intent = new Intent(this, Exercises.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_badges:
-                intent = new Intent(this, Friends.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_friends:
-                intent = new Intent(this, Friends.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_forums:
-                intent = new Intent(this, ForumsActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_settings:
-                intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.nav_report:
-                intent = new Intent(this, ReportActivity.class);
-                startActivity(intent);
-                break;
-            default: // !! Examine more later
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                    for (String i : tmp) {
+                        strArr.add(i);
+                    }
+
+                    ArrayAdapter<String> itemsAdapter =
+                            new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, strArr.toArray());
+                    ListView listView = (ListView) findViewById(R.id.lvItems);
+                    listView.setAdapter(itemsAdapter);
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            });
+
+
+        }
+        else {
+            Toast.makeText(this, "You are not signed in, please go sign in now.",
+                    Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(this, google_login.class);
+            startActivity(intent);
         }
 
-        // Highlight the selected item has been done by NavigationView
-        menuItem.setChecked(true);
-        // Set action bar title
-        setTitle(menuItem.getTitle());
-        // Close the navigation drawer
-        mDrawer.closeDrawers();
     }
 
 }

@@ -17,6 +17,7 @@ import android.support.v7.widget.MenuPopupWindow;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.itemanimators.AlphaCrossFadeAnimator;
@@ -72,7 +79,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class google_login extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
@@ -91,6 +100,8 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
     AccountHeader headerResult;
 
     private FirebaseAuth mAuth;
+
+    DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,10 +180,9 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                 })
                 .build();
 
-
         // Button listeners
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-        //findViewById(R.id.sign_out_button).setOnClickListener(this);
+        findViewById(R.id.sign_out_button).setOnClickListener(this);
         //findViewById(R.id.disconnect_button).setOnClickListener(this);
 
         // Configure sign-in to request the user's ID, email address, and basic
@@ -247,7 +257,9 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
             case R.id.sign_in_button:
                 signIn();
                 break;
-            // ...
+            case R.id.sign_out_button:
+                signOut();
+                break;
         }
     }
     private void signIn() {
@@ -278,6 +290,38 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Account name:" + acct.getDisplayName());
             Log.d(TAG, "Account profile image url:" + acct.getPhotoUrl());
             //DrawerImageLoader.getInstance().setImage((ImageView) profile.generateView(this), result.getSignInAccount().getPhotoUrl(), "Profile");
+
+            Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
+
+            Log.d(TAG, String.valueOf(query));
+
+            query.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.w(TAG, "HAI!");
+                    Log.w(TAG, String.valueOf(dataSnapshot.exists()));
+                    if(dataSnapshot.exists()) {
+                        Log.w(TAG, dataSnapshot.getValue().toString());
+                        for (final DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            Log.w(TAG, snapshot.child("username").getValue(String.class));
+                            Log.w(TAG, snapshot.child("uid").getValue(String.class));
+                        }
+                    }
+                    else {
+                        mAuth.getCurrentUser().sendEmailVerification();
+                        FirebaseRef.child("users").setValue(mAuth.getCurrentUser().getUid());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("username").setValue(mAuth.getCurrentUser().getDisplayName());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("uid").setValue(mAuth.getCurrentUser().getUid());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("photoURL").setValue(mAuth.getCurrentUser().getPhotoUrl().toString());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("email").setValue(mAuth.getCurrentUser().getEmail());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    throw databaseError.toException();
+                }
+            });
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(null);
@@ -436,6 +480,39 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
             }
             headerResult.updateProfile(profile);
             //DrawerImageLoader.getInstance().setImage((ImageView) profile.generateView(this), currentUser.getPhotoUrl(), "Profile");
+
+            Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
+
+            Log.d(TAG, String.valueOf(query));
+
+            query.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.w(TAG, "HAI!");
+                    Log.w(TAG, String.valueOf(dataSnapshot.exists()));
+                    if(dataSnapshot.exists()) {
+                        Log.w(TAG, dataSnapshot.getValue().toString());
+                        for (final DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            Log.w(TAG, snapshot.child("username").getValue(String.class));
+                            Log.w(TAG, snapshot.child("uid").getValue(String.class));
+                        }
+                    }
+                    else {
+                        //mAuth.getCurrentUser().sendEmailVerification();
+                        FirebaseRef.child("users").setValue(mAuth.getCurrentUser().getUid());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("username").setValue(mAuth.getCurrentUser().getDisplayName());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("uid").setValue(mAuth.getCurrentUser().getUid());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("photoURL").setValue(mAuth.getCurrentUser().getPhotoUrl().toString());
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("email").setValue(mAuth.getCurrentUser().getEmail());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    throw databaseError.toException();
+                }
+            });
+
         }
         //Toast.makeText(this, "User email:" + currentUser.getEmail() + "User ID:" + currentUser.getUid() + "Photo url:" + currentUser.getPhotoUrl(), Toast.LENGTH_SHORT).show();
     }
