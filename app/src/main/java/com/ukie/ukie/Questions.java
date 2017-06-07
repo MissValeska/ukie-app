@@ -60,11 +60,14 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
         index = intent.getIntExtra("index", index);
         progress = intent.getIntExtra("progress", progress);
 
+        Log.w(TAG, String.valueOf(tmpArray.size()));
+
         for(int i = 0; i < QuestionCount; i++) {
+            Log.w(TAG, "Combien fois?" + QuestionCount);
             try {
                 data.add(new JSONObject(tmpArray.get(i)));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error in json:" + e.getMessage());
             }
         }
 
@@ -121,7 +124,24 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                     @Override
                     public void onClick(View v) {
                         if(index + 1 != QuestionCount) {
-                            Intent intent = new Intent(getApplicationContext(), Questions.class);
+                            Intent intent = null;
+                            try {
+                                if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
+                                    intent = new Intent(getApplicationContext(), Questions.class);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
+                                    intent = new Intent(getApplicationContext(), ImageQuestions.class);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                                        /*if(firstType.compareToIgnoreCase("dropdown") == 0) {
+                                            intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
+                                        }*/
 
                             intent.putStringArrayListExtra("data", tmpArray);
                             intent.putExtra("count", QuestionCount);
@@ -132,7 +152,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                     }
                 });
 
-            } else {
+            } else { // !! Consider locking this if the user gets the question correct, so the progress bar cannot decrement again
                 textView1.setText("That's incorrect, the correct conjugation for " + getConj("conjtype") + " of " + getConj("infin") + " is \"" + getConj("conj") + "\"");
                 textView1.setChecked(false);
                 //checkBtn.setBackgroundColor(getResources().getColor(md_red_800));

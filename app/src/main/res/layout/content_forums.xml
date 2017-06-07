@@ -13,4 +13,20 @@
     tools:context="com.ukie.ukie.ForumsActivity"
     tools:showIn="@layout/activity_forums">
 
+    <ListView
+        android:id="@+id/lvItems"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/rawrText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="M"
+        android:textAppearance="@android:style/TextAppearance.Material"
+        android:textSize="400sp" />
 </RelativeLayout>

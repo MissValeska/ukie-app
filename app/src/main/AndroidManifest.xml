@@ -89,6 +89,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ukie.ukie.MainActivity" />
         </activity>
+        <activity
+            android:name=".ImageQuestions"
+            android:label="@string/title_activity_image_questions"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".AudioQuestions"
+            android:label="@string/title_activity_audio_questions"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

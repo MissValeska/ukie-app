@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.ukie.ukie.ForumsActivity">
+    tools:context="com.ukie.ukie.ImageQuestions">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -16,12 +15,22 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/md_amber_500"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_forums"
-        android:id="@+id/include6" />
+    <include layout="@layout/content_image_questions"
+        android:id="@+id/include7" />
+
+    <Button
+        android:id="@+id/imgNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:background="@color/md_amber_500"
+        android:text="Check"
+        app:layout_anchor="@+id/include7"
+        app:layout_anchorGravity="bottom|center_horizontal" />
 
 </android.support.design.widget.CoordinatorLayout>

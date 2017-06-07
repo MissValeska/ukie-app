@@ -10,5 +10,7 @@
     <string name="title_activity_report">ReportActivity</string>
     <string name="title_activity_questions">Questions</string>
     <string name="title_activity_google_login">google_login</string>
+    <string name="title_activity_image_questions">ImageQuestions</string>
+    <string name="title_activity_audio_questions">AudioQuestions</string>
 
 </resources>

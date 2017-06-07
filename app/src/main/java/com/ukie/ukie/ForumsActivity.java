@@ -1,6 +1,7 @@
 package com.ukie.ukie;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -10,10 +11,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,14 +32,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-public class ForumsActivity extends AppCompatActivity {
+public class ForumsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "SignInActivity";
 
     private FirebaseAuth mAuth;
 
-    DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
+    ArrayList<String> forumsList = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +50,15 @@ public class ForumsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        TextView rawrTxt = (TextView) findViewById(R.id.rawrText);
+
+        rawrTxt.setText("Ж");
+        rawrTxt.setTextSize(500);
+        //startActivity(new Intent(this, ImageQuestions.class));
+
         mAuth = FirebaseAuth.getInstance();
+
+        DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
         if(mAuth.getCurrentUser() != null) {
 
@@ -52,22 +66,18 @@ public class ForumsActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     Log.w(TAG, snapshot.getValue().toString());
-                    JSONObject tmp = null;
-                    ArrayList<String> strArr = new ArrayList<String>();
-                    try {
-                        tmp = new JSONObject(snapshot.getValue().toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
 
-                    for (String i : tmp) {
-                        strArr.add(i);
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        Log.d(TAG, "STUFF" + child.getKey());
+                        forumsList.add(child.getKey());
                     }
 
                     ArrayAdapter<String> itemsAdapter =
-                            new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, strArr.toArray());
+                            new ArrayAdapter<String>(ForumsActivity.this, android.R.layout.simple_list_item_1, forumsList);
                     ListView listView = (ListView) findViewById(R.id.lvItems);
                     listView.setAdapter(itemsAdapter);
+
+                    listView.setOnItemClickListener(ForumsActivity.this);
 
                 }
 
@@ -87,4 +97,10 @@ public class ForumsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        Log.d(TAG, parent.getItemAtPosition(position).toString());
+
+    }
 }

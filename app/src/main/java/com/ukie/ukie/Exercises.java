@@ -56,6 +56,8 @@ public class Exercises extends AppCompatActivity {
     String url ="https://ukie.herokuapp.com/";
 
     ArrayList<String> data = new ArrayList<String>();
+    ArrayList<String> typeList = new ArrayList<String>();
+    ArrayList<String> urlArr = new ArrayList<String>();
 
     int QuestionCount = 0;
     int ExerciseCount = 0;
@@ -74,38 +76,43 @@ public class Exercises extends AppCompatActivity {
             public void onClick(View view) {
                 DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
-                FirebaseRef.addValueEventListener(new ValueEventListener() {
+                FirebaseRef.child("Exercises").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
                         Log.w(TAG, snapshot.getValue().toString());
-                        Intent intent = new Intent(getApplicationContext(), Questions.class);
-                        JSONObject tmp = null;
-                        try {
-                            tmp = new JSONObject(snapshot.getValue().toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            ExerciseCount = tmp.getInt("ExerciseNum");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        String firstType = null;
+
+                        ExerciseCount = snapshot.child("ExerciseNum").getValue(int.class);
+                        Log.w(TAG, String.valueOf(ExerciseCount));
+
                         for (int d = 1; d <= ExerciseCount; d++) {
-                                try {
-                                    QuestionCount = (tmp.getJSONObject("Exercise" + String.valueOf(d)).getInt("QuestionNum"));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                            QuestionCount = snapshot.child("Exercise" + String.valueOf(d)).child("QuestionNum").getValue(int.class);
                                 for (int i = 1; i <= QuestionCount; i++) {
-                                    try {
-                                        data.add((tmp.getJSONObject("Exercise" + String.valueOf(d))).getJSONObject("Question" + String.valueOf(i)).toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
+                                    data.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).getValue().toString());
+                                    if(i == 1) {
+                                        firstType = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class);
                                     }
+                                    /*if(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class) == "audio" || snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class) == "image") {
+                                        typeList.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
+                                        urlArr.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
+                                    }*/
                                     Log.w(TAG, "HAI");
                                 }
                             }
+                        Log.w(TAG, firstType);
+                        Intent intent = null;
+                        if(firstType.compareToIgnoreCase("text") == 0) {
+                            intent = new Intent(getApplicationContext(), Questions.class);
+                        }
+                        if(firstType.compareToIgnoreCase("audio") == 0 || firstType.compareToIgnoreCase("image") == 0) {
+                            intent = new Intent(getApplicationContext(), ImageQuestions.class);
+                        }
+                        /*if(firstType.compareToIgnoreCase("dropdown") == 0) {
+                            intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
+                        }*/
+                        Log.w(TAG, String.valueOf(data.size()));
                         intent.putStringArrayListExtra("data", data);
+                        intent.putStringArrayListExtra("typeList", typeList);
                         intent.putExtra("count", QuestionCount);
                         intent.putExtra("index", 0);
                         intent.putExtra("progress", 0);
