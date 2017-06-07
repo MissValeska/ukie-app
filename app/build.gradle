@@ -43,6 +43,7 @@ dependencies {
     // Single target that includes all FirebaseUI libraries above
     compile project(path: ':backend', configuration: 'android-endpoints')
     compile project(path: ':backend1', configuration: 'android-endpoints')
+    compile 'com.google.code.gson:gson:2.8.0'
     compile 'com.googlecode.objectify:objectify:5.0.3'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.mikepenz:itemanimators:0.2.4@aar'

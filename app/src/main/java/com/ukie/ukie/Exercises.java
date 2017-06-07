@@ -3,6 +3,8 @@ package com.ukie.ukie;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -55,9 +57,7 @@ public class Exercises extends AppCompatActivity {
 
     String url ="https://ukie.herokuapp.com/";
 
-    ArrayList<String> data = new ArrayList<String>();
-    ArrayList<String> typeList = new ArrayList<String>();
-    ArrayList<String> urlArr = new ArrayList<String>();
+    ArrayList<questionData> data = new ArrayList<questionData>();
 
     int QuestionCount = 0;
     int ExerciseCount = 0;
@@ -88,7 +88,20 @@ public class Exercises extends AppCompatActivity {
                         for (int d = 1; d <= ExerciseCount; d++) {
                             QuestionCount = snapshot.child("Exercise" + String.valueOf(d)).child("QuestionNum").getValue(int.class);
                                 for (int i = 1; i <= QuestionCount; i++) {
-                                    data.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).getValue().toString());
+                                    questionData tmp = new questionData();
+                                    tmp.conj = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("conj").getValue(String.class);
+                                    tmp.conjtype = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("conjtype").getValue(String.class);
+                                    tmp.infin = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("infin").getValue(String.class);
+                                    tmp.type = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class);
+                                    tmp.correctAnswer = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("correctAnswer").getValue(int.class);
+                                    for(int x = 0; x < 4; x++) {
+                                        tmp.qAudio[x] = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("qAudio" + String.valueOf(x+1)).getValue(String.class);
+                                        tmp.qImg[x] = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("qImg" + String.valueOf(x+1)).getValue(String.class);
+                                    }
+                                    tmp.questionText = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("questionText").getValue(String.class);
+                                    data.add(tmp);
+                                    //data.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).getValue().toString());
+                                    //Log.w(TAG, data.get(i-1));
                                     if(i == 1) {
                                         firstType = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class);
                                     }
@@ -111,8 +124,7 @@ public class Exercises extends AppCompatActivity {
                             intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
                         }*/
                         Log.w(TAG, String.valueOf(data.size()));
-                        intent.putStringArrayListExtra("data", data);
-                        intent.putStringArrayListExtra("typeList", typeList);
+                        intent.putExtra("data", data);
                         intent.putExtra("count", QuestionCount);
                         intent.putExtra("index", 0);
                         intent.putExtra("progress", 0);

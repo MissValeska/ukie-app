@@ -2,44 +2,27 @@ package com.ukie.ukie;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StreamDownloadTask;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 
 public class ImageQuestions extends AppCompatActivity {
@@ -52,9 +35,7 @@ public class ImageQuestions extends AppCompatActivity {
 
     ArrayList<String> audioList = new ArrayList<String>();
 
-    ArrayList<JSONObject> data = new ArrayList<JSONObject>();
-
-    ArrayList<String> tmpArray;
+    ArrayList<questionData> data;
 
     int QuestionCount = 0;
     int index = 0;
@@ -86,7 +67,7 @@ public class ImageQuestions extends AppCompatActivity {
 
                     Intent intent = getIntent();
 
-                    tmpArray = intent.getStringArrayListExtra("data");
+                    data = intent.getParcelableExtra("data");
 
                     QuestionCount = intent.getIntExtra("count", QuestionCount);
                     index = intent.getIntExtra("index", index);
@@ -105,24 +86,18 @@ public class ImageQuestions extends AppCompatActivity {
                     String q3url = null;
                     String q4url = null;
 
-                    try {
-                        Log.w(TAG, data.get(index).getString("question-text"));
-                        qText.setText(data.get(index).getString("question-text"));
-                        audioList.add(data.get(index).getString("qAudio1"));
-                        audioList.add(data.get(index).getString("qAudio2"));
-                        audioList.add(data.get(index).getString("qAudio3"));
-                        audioList.add(data.get(index).getString("qAudio4"));
-                        tmpInt = data.get(index).getInt("correctAnswer") - 1;
-                        type = data.get(index).getString("type");
-                        q1url = data.get(index).getString("question1");
-                        q2url = data.get(index).getString("question2");
-                        q3url = data.get(index).getString("question3");
-                        q4url = data.get(index).getString("question4");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    final int correctAnswr = tmpInt;
+                    Log.w(TAG, data.get(index).questionText);
+                    qText.setText(data.get(index).questionText);
+                    audioList.add(data.get(index).qAudio[0]);
+                    audioList.add(data.get(index).qAudio[1]);
+                    audioList.add(data.get(index).qAudio[2]);
+                    audioList.add(data.get(index).qAudio[3]);
+                    final int correctAnswr = data.get(index).correctAnswer - 1;
+                    type = data.get(index).type;
+                    q1url = data.get(index).qImg[0];
+                    q2url = data.get(index).qImg[1];
+                    q3url = data.get(index).qImg[2];
+                    q4url = data.get(index).qImg[3];
 
                     /*qText.setText(snapshot.child("question-text").getValue(String.class));
 
@@ -332,25 +307,17 @@ public class ImageQuestions extends AppCompatActivity {
                                     if(index + 1 != QuestionCount) {
 
                                         Intent intent = null;
-                                        try {
-                                            if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
-                                                intent = new Intent(getApplicationContext(), Questions.class);
-                                            }
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                        if(data.get(index+1).type.compareToIgnoreCase("text") == 0) {
+                                            intent = new Intent(getApplicationContext(), Questions.class);
                                         }
-                                        try {
-                                            if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
-                                                intent = new Intent(getApplicationContext(), ImageQuestions.class);
-                                            }
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                        if(data.get(index+1).type.compareToIgnoreCase("audio") == 0 || data.get(index+1).type.compareToIgnoreCase("image") == 0) {
+                                            intent = new Intent(getApplicationContext(), ImageQuestions.class);
                                         }
                                         /*if(firstType.compareToIgnoreCase("dropdown") == 0) {
                                             intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
                                         }*/
 
-                                        intent.putStringArrayListExtra("data", tmpArray);
+                                        intent.putExtra("data", data);
                                         intent.putExtra("count", QuestionCount);
                                         intent.putExtra("index", index + 1);
                                         intent.putExtra("progress", prog.getProgress());
