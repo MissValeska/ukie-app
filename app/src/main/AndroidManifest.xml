@@ -96,6 +96,22 @@
         <activity
             android:name=".AudioQuestions"
             android:label="@string/title_activity_audio_questions"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".dropdownQuestions"
+            android:label="@string/title_activity_dropdown_questions"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".radioQuestions"
+            android:label="@string/title_activity_radio_questions"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".loadingScreen"
+            android:label="@string/title_activity_loading_screen"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".splashScreen"
+            android:label="@string/title_activity_splash_screen"
             android:theme="@style/AppTheme"></activity>
     </application>
 

@@ -14,8 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.squareup.picasso.Picasso;
@@ -43,6 +46,8 @@ public class ImageQuestions extends AppCompatActivity {
 
     ProgressBar prog;
 
+    final DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +66,11 @@ public class ImageQuestions extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
-
         if(mAuth.getCurrentUser() != null) {
 
                     Intent intent = getIntent();
 
-                    data = intent.getParcelableExtra("data");
+                    data = (ArrayList<questionData>) intent.getSerializableExtra("data");
 
                     QuestionCount = intent.getIntExtra("count", QuestionCount);
                     index = intent.getIntExtra("index", index);
@@ -86,18 +89,18 @@ public class ImageQuestions extends AppCompatActivity {
                     String q3url = null;
                     String q4url = null;
 
-                    Log.w(TAG, data.get(index).questionText);
-                    qText.setText(data.get(index).questionText);
-                    audioList.add(data.get(index).qAudio[0]);
-                    audioList.add(data.get(index).qAudio[1]);
-                    audioList.add(data.get(index).qAudio[2]);
-                    audioList.add(data.get(index).qAudio[3]);
-                    final int correctAnswr = data.get(index).correctAnswer - 1;
-                    type = data.get(index).type;
-                    q1url = data.get(index).qImg[0];
-                    q2url = data.get(index).qImg[1];
-                    q3url = data.get(index).qImg[2];
-                    q4url = data.get(index).qImg[3];
+                    Log.w(TAG, data.get(index).getString("question-text"));
+                    qText.setText(data.get(index).getString("question-text"));
+                    audioList.add(data.get(index).getString("qAudio1"));
+                    audioList.add(data.get(index).getString("qAudio2"));
+                    audioList.add(data.get(index).getString("qAudio3"));
+                    audioList.add(data.get(index).getString("qAudio4"));
+                    final int correctAnswr = data.get(index).getInt("correctAnswer") - 1;
+                    type = data.get(index).getString("type");
+                    q1url = data.get(index).getString("question1");
+                    q2url = data.get(index).getString("question2");
+                    q3url = data.get(index).getString("question3");
+                    q4url = data.get(index).getString("question4");
 
                     /*qText.setText(snapshot.child("question-text").getValue(String.class));
 
@@ -295,6 +298,18 @@ public class ImageQuestions extends AppCompatActivity {
                                 prog.setProgress(prog.getProgress()+1);
                                 Toast.makeText(ImageQuestions.this, "You are correct!",
                                         Toast.LENGTH_SHORT).show();
+                                /*FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child().addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });*/
+
                                 if(buttonPressCount[0] == 0) {
                                     if(index + 1 != QuestionCount) {
                                         ((Button) v).setText("Next");
@@ -307,15 +322,18 @@ public class ImageQuestions extends AppCompatActivity {
                                     if(index + 1 != QuestionCount) {
 
                                         Intent intent = null;
-                                        if(data.get(index+1).type.compareToIgnoreCase("text") == 0) {
+                                        if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
                                             intent = new Intent(getApplicationContext(), Questions.class);
                                         }
-                                        if(data.get(index+1).type.compareToIgnoreCase("audio") == 0 || data.get(index+1).type.compareToIgnoreCase("image") == 0) {
+                                        if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
                                             intent = new Intent(getApplicationContext(), ImageQuestions.class);
                                         }
-                                        /*if(firstType.compareToIgnoreCase("dropdown") == 0) {
-                                            intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
-                                        }*/
+                                        if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
+                                            intent = new Intent(getApplicationContext(), dropdownQuestions.class);
+                                        }
+                                        if(data.get(index+1).getString("type").compareToIgnoreCase("radio") == 0) {
+                                            intent = new Intent(getApplicationContext(), radioQuestions.class);
+                                        }
 
                                         intent.putExtra("data", data);
                                         intent.putExtra("count", QuestionCount);

@@ -12,5 +12,9 @@
     <string name="title_activity_google_login">google_login</string>
     <string name="title_activity_image_questions">ImageQuestions</string>
     <string name="title_activity_audio_questions">AudioQuestions</string>
+    <string name="title_activity_dropdown_questions">dropdownQuestions</string>
+    <string name="title_activity_radio_questions">radioQuestions</string>
+    <string name="title_activity_loading_screen">loadingScreen</string>
+    <string name="title_activity_splash_screen">splashScreen</string>
 
 </resources>

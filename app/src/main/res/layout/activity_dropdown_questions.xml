@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.ukie.ukie.Questions">
+    tools:context="com.ukie.ukie.dropdownQuestions">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -17,22 +16,21 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/md_amber_500"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:title="Question 1" />
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_questions"
-        android:id="@+id/include3" />
+    <include layout="@layout/content_dropdown_questions"
+        android:id="@+id/include8" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/button3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:backgroundTint="@color/md_amber_600"
+        android:layout_gravity="top|center_horizontal"
+        android:background="@color/md_amber_500"
         android:text="Check"
-        app:layout_anchor="@+id/include3"
+        app:layout_anchor="@+id/include8"
         app:layout_anchorGravity="bottom|center_horizontal" />
 
 </android.support.design.widget.CoordinatorLayout>

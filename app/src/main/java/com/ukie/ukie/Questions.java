@@ -14,8 +14,14 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -31,6 +37,10 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
     ArrayList<questionData> data;
 
+    final DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
+
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,12 +50,16 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mAuth = FirebaseAuth.getInstance();
+
         EditText textView = (EditText) findViewById(R.id.enterConj);
         textView.setOnKeyListener(this);
 
         Intent intent = getIntent();
 
-        data = intent.getParcelableExtra("data");
+        data = (ArrayList<questionData>) intent.getSerializableExtra("data");
+
+        Log.w(TAG, data.get(0).getConj());
 
         QuestionCount = intent.getIntExtra("count", QuestionCount);
         index = intent.getIntExtra("index", index);
@@ -53,18 +67,6 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
         Log.w(TAG, String.valueOf(data.size()));
 
-        for (questionData rawr : data) {
-            Log.w(TAG, rawr.toString());
-        }
-
-        /*for(int i = 0; i < QuestionCount; i++) {
-            Log.w(TAG, "Combien fois?" + QuestionCount);
-            try {
-                data.add(new JSONObject(data.get(i)));
-            } catch (JSONException e) {
-                Log.e(TAG, "Error in json:" + e.getMessage());
-            }
-        }*/
 
         prog = (ProgressBar) findViewById(R.id.progressBar3);
         prog.setMax(QuestionCount);
@@ -72,8 +74,19 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
         Log.w(TAG, "Rawr:" + String.valueOf(QuestionCount));
 
-        Log.w(TAG, data.get(index).conj);
-        ((TextView) findViewById(R.id.instructions)).setText("Conjugate " + data.get(index).infin + " for " + data.get(index).conjtype);
+        Log.w(TAG, data.get(index).getString("conj"));
+        ((TextView) findViewById(R.id.instructions)).setText("Conjugate " + data.get(index).getString("infin") + " for " + data.get(index).getString("conjtype"));
+
+    }
+
+    public String getConj(String str) {
+
+        if(data.get(index).getString(str) != null) {
+            return data.get(index).getString(str);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -87,14 +100,31 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
 
             String tmp = ((EditText) v).getText().toString();
 
-            if (tmp.compareToIgnoreCase(data.get(index).conj) == 0) {
+            if (tmp.compareToIgnoreCase(getConj("conj")) == 0) {
                 textView1.setText("Correct!");
                 textView1.setChecked(true);
                 //textView1.setTextColor(100);
                 if (prog.getProgress() != prog.getMax()) {
                     prog.setProgress(prog.getProgress() + 1);
                 }
+                final boolean[] ran = {false};
+                FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("correct").child(getConj("conj")).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ran[0] = true;
+                        int count = Integer.parseInt(dataSnapshot.getValue().toString());
 
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("correct").child(getConj("conj")).setValue(count+1);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                if(!ran[0]) {
+                    FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("correct").child(getConj("conj")).setValue(1);
+                }
                 Log.w(TAG, "Victory!");
 
                 FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
@@ -105,15 +135,18 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                     public void onClick(View v) {
                         if(index + 1 != QuestionCount) {
                             Intent intent = null;
-                            if(data.get(index+1).type.compareToIgnoreCase("text") == 0) {
+                            if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
                                 intent = new Intent(getApplicationContext(), Questions.class);
                             }
-                            if(data.get(index+1).type.compareToIgnoreCase("audio") == 0 || data.get(index+1).type.compareToIgnoreCase("image") == 0) {
+                            if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
                                 intent = new Intent(getApplicationContext(), ImageQuestions.class);
                             }
-                            /*if(firstType.compareToIgnoreCase("dropdown") == 0) {
-                                intent = new Intent(getApplicationContext(), ImageQuestions.class); // As of yet, non-existent
-                            }*/
+                            if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
+                                intent = new Intent(getApplicationContext(), dropdownQuestions.class);
+                            }
+                            if(data.get(index+1).getString("type").compareToIgnoreCase("radio") == 0) {
+                                intent = new Intent(getApplicationContext(), radioQuestions.class);
+                            }
 
                             intent.putExtra("data", data);
                             intent.putExtra("count", QuestionCount);
@@ -125,12 +158,30 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                 });
 
             } else { // !! Consider locking this if the user gets the question correct, so the progress bar cannot decrement again
-                textView1.setText("That's incorrect, the correct conjugation for " + data.get(index).conjtype + " of " + data.get(index).infin + " is \"" + data.get(index).conj + "\"");
+                textView1.setText("That's incorrect, the correct conjugation for " + getConj("conjtype") + " of " + getConj("infin") + " is \"" + getConj("conj") + "\"");
                 textView1.setChecked(false);
                 //checkBtn.setBackgroundColor(getResources().getColor(md_red_800));
                 //textView1.setTextColor(500);
                 if (prog.getProgress() != 0) {
                     prog.setProgress(prog.getProgress() - 1);
+                }
+                final boolean[] ran = {false};
+                FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("incorrect").child(getConj("conj")).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ran[0] = true;
+                        int count = Integer.parseInt(dataSnapshot.getValue().toString());
+
+                        FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("incorrect").child(getConj("conj")).setValue(count+1);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                if(!ran[0]) {
+                    FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("incorrect").child(getConj("conj")).setValue(1);
                 }
             }
         }
