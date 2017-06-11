@@ -32,6 +32,116 @@ public class questionData implements Serializable {
     String questionText2;
     String dropDown1;
     String dropDown2;
+    String radioAudio;
+    String radioText1;
+    String radioText2;
+    String radioText3;
+    String radioText4;
+    String img1Text;
+    String img2Text;
+    String img3Text;
+    String img4Text;
+    String letter;
+    String radioImg;
+
+    public String getradioImg() {
+        if(radioImg != null) {
+            return radioImg;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getLetter() {
+        if(letter != null) {
+            return letter;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getimg4Text() {
+        if(img4Text != null) {
+            return img4Text;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getimg3Text() {
+        if(img3Text != null) {
+            return img3Text;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getimg2Text() {
+        if(img2Text != null) {
+            return img2Text;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getimg1Text() {
+        if(img1Text != null) {
+            return img1Text;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getradioAudio() {
+        if(radioAudio != null) {
+            return radioAudio;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getradioText1() {
+        if(radioText1 != null) {
+            return radioText1;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getradioText2() {
+        if(radioText2 != null) {
+            return radioText2;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getradioText3() {
+        if(radioText3 != null) {
+            return radioText3;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String getradioText4() {
+        if(radioText4 != null) {
+            return radioText4;
+        }
+        else {
+            return null;
+        }
+    }
 
     public String getdropDown2() {
         if(dropDown2 != null) {
@@ -108,6 +218,28 @@ public class questionData implements Serializable {
                 return getQuestionText();
             case "questionText":
                 return getQuestionText();
+            case "radioAudio":
+                return getradioAudio();
+            case "radioText1":
+                return getradioText1();
+            case "radioText2":
+                return getradioText2();
+            case "radioText3":
+                return getradioText3();
+            case "radioText4":
+                return getradioText4();
+            case "img1Text":
+                return getimg1Text();
+            case "img2Text":
+                return getimg2Text();
+            case "img3Text":
+                return getimg3Text();
+            case "img4Text":
+                return getimg4Text();
+            case "letter":
+                return getLetter();
+            case "radioImg":
+                return getradioImg();
         }
         return null;
     }

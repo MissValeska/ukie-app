@@ -165,9 +165,10 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                         new PrimaryDrawerItem().withName("Exercises").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_fitness_center),
                         new PrimaryDrawerItem().withName("Badges").withIdentifier(4).withIcon(GoogleMaterial.Icon.gmd_local_offer),
                         new PrimaryDrawerItem().withName("Friends").withIdentifier(5).withIcon(GoogleMaterial.Icon.gmd_people),
-                        new PrimaryDrawerItem().withName("Forums").withIdentifier(6).withIcon(GoogleMaterial.Icon.gmd_forum),
+                        new PrimaryDrawerItem().withName("Discussions").withIdentifier(6).withIcon(GoogleMaterial.Icon.gmd_forum),
                         new PrimaryDrawerItem().withName("Settings").withIdentifier(7).withIcon(GoogleMaterial.Icon.gmd_settings),
-                        new PrimaryDrawerItem().withName("Report").withIdentifier(8).withIcon(GoogleMaterial.Icon.gmd_feedback)
+                        new PrimaryDrawerItem().withName("About").withIdentifier(9).withIcon(GoogleMaterial.Icon.gmd_info),
+                        new PrimaryDrawerItem().withName("Contact").withIdentifier(8).withIcon(GoogleMaterial.Icon.gmd_email)
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -461,6 +462,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
             default: // !! Examine more later
                 intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
+                break;
         }
 
     }

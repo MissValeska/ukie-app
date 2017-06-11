@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -16,6 +17,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-
+    //getResources().getColor(R.color.md_light_blue_500)
     // Make sure to be using android.support.v7.app.ActionBarDrawerToggle version.
     // The android.support.v4.app.ActionBarDrawerToggle has been deprecated.
     private ActionBarDrawerToggle drawerToggle;
@@ -75,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                         new PrimaryDrawerItem().withName("Profile").withIdentifier(1).withIcon(GoogleMaterial.Icon.gmd_account_circle),
                         new DividerDrawerItem(),
                         new PrimaryDrawerItem().withName("Dashboard").withIdentifier(2).withIcon(GoogleMaterial.Icon.gmd_dashboard),
-                        new PrimaryDrawerItem().withName("Exercises").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_fitness_center),
+                        new PrimaryDrawerItem().withName("Modules").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_fitness_center),
                         new PrimaryDrawerItem().withName("Badges").withIdentifier(4).withIcon(GoogleMaterial.Icon.gmd_local_offer),
                         new PrimaryDrawerItem().withName("Friends").withIdentifier(5).withIcon(GoogleMaterial.Icon.gmd_people),
                         new PrimaryDrawerItem().withName("Forums").withIdentifier(6).withIcon(GoogleMaterial.Icon.gmd_forum),
@@ -202,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case 3:
-                intent = new Intent(this, Exercises.class);
+                intent = new Intent(this, ModuleActivity.class);
                 startActivity(intent);
                 break;
             case 4:

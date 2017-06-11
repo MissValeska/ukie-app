@@ -1,7 +1,10 @@
 package com.ukie.ukie;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.PictureDrawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +16,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.model.StreamEncoder;
+import com.caverock.androidsvg.SVG;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,7 +34,11 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Properties;
+
+import static com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade;
 
 public class ImageQuestions extends AppCompatActivity {
 
@@ -80,6 +92,11 @@ public class ImageQuestions extends AppCompatActivity {
                     prog.setMax(QuestionCount);
                     prog.setProgress(progress);
 
+                    final TextView img1Text = (TextView) findViewById(R.id.img1Text);
+                    final TextView img2Text = (TextView) findViewById(R.id.img2Text);
+                    final TextView img3Text = (TextView) findViewById(R.id.img3Text);
+                    final TextView img4Text = (TextView) findViewById(R.id.img4Text);
+
                     String type = null;
 
                     int tmpInt = 0;
@@ -97,10 +114,6 @@ public class ImageQuestions extends AppCompatActivity {
                     audioList.add(data.get(index).getString("qAudio4"));
                     final int correctAnswr = data.get(index).getInt("correctAnswer") - 1;
                     type = data.get(index).getString("type");
-                    q1url = data.get(index).getString("question1");
-                    q2url = data.get(index).getString("question2");
-                    q3url = data.get(index).getString("question3");
-                    q4url = data.get(index).getString("question4");
 
                     /*qText.setText(snapshot.child("question-text").getValue(String.class));
 
@@ -113,14 +126,34 @@ public class ImageQuestions extends AppCompatActivity {
 
                     Log.w(TAG, String.valueOf(correctAnswr));*/
 
+
                     if(type.compareToIgnoreCase("image") == 0) {
                         Log.w(TAG, "RAWR");
-                        Picasso.with(q1.getContext()).load(q1url).into(q1);
-                        Picasso.with(q2.getContext()).load(q2url).into(q2);
-                        Picasso.with(q3.getContext()).load(q3url).into(q3);
-                        Picasso.with(q4.getContext()).load(q4url).into(q4);
+                        img1Text.setText(data.get(index).getString("img1Text"));
+                        img2Text.setText(data.get(index).getString("img2Text"));
+                        img3Text.setText(data.get(index).getString("img3Text"));
+                        img4Text.setText(data.get(index).getString("img4Text"));
+                        img1Text.setVisibility(View.VISIBLE);
+                        img2Text.setVisibility(View.VISIBLE);
+                        img3Text.setVisibility(View.VISIBLE);
+                        img4Text.setVisibility(View.VISIBLE);
+
+                        q1url = data.get(index).getString("qImg1");
+                        q2url = data.get(index).getString("qImg2");
+                        q3url = data.get(index).getString("qImg3");
+                        q4url = data.get(index).getString("qImg4");
+                        // !! Consider changing to properly center the image, compared to the textviews below the images, and or reposition the textviews
+                        Picasso.with(q1.getContext()).load(q1url).fit().centerCrop().into(q1);
+                        Picasso.with(q2.getContext()).load(q2url).fit().centerCrop().into(q2);
+                        Picasso.with(q3.getContext()).load(q3url).fit().centerCrop().into(q3);
+                        Picasso.with(q4.getContext()).load(q4url).fit().centerCrop().into(q4);
+
+                        q1.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                        q2.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                        q3.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                        q4.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
                     }
-                    if(type.compareToIgnoreCase("audio") == 0) {
+                    else if(type.compareToIgnoreCase("audio") == 0) {
                         Log.w(TAG, "OMG");
                         q1.setImageDrawable(new IconicsDrawable(ImageQuestions.this, GoogleMaterial.Icon.gmd_volume_up).backgroundColor(getResources().getColor(R.color.tw__transparent)).color(getResources().getColor(R.color.md_light_blue_500)));
                         q2.setImageDrawable(new IconicsDrawable(ImageQuestions.this, GoogleMaterial.Icon.gmd_volume_up).backgroundColor(getResources().getColor(R.color.tw__transparent)).color(getResources().getColor(R.color.md_light_blue_500)));
@@ -159,7 +192,7 @@ public class ImageQuestions extends AppCompatActivity {
                         q1mp.setDataSource(audioList.get(0));
                         q1mp.prepare();
                     } catch (IOException e) {
-                        Log.e(TAG, "q1 prepare() failed");
+                        Log.e(TAG, "q2 prepare() failed");
                     }
                     q1.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -167,19 +200,25 @@ public class ImageQuestions extends AppCompatActivity {
 
                             if(qisSelected[0]) {
                                 qisSelected[0] = false;
+                                img1Text.setTextColor(Color.parseColor("#7A7A7A"));
                             }
                             else {
+                                img1Text.setTextColor(Color.parseColor("#00AEF9"));
+
+                                img2Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img3Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img4Text.setTextColor(Color.parseColor("#7A7A7A"));
+
                                 qisSelected[0] = true;
                                 qisSelected[1] = false;
                                 qisSelected[2] = false;
                                 qisSelected[3] = false;
                             }
 
-                            if (!q1isPLAYING[0]) {
+                            if (!q1mp.isPlaying()) {
                                 q1isPLAYING[0] = true;
-                                q1mp.seekTo(0);
                                 q1mp.start();
-                            } else {
+                            } else if(q1mp.isPlaying()) {
                                 q1isPLAYING[0] = false;
                                 q1mp.seekTo(0);
                                 q1mp.start();
@@ -200,19 +239,25 @@ public class ImageQuestions extends AppCompatActivity {
 
                             if(qisSelected[1]) {
                                 qisSelected[1] = false;
+                                img2Text.setTextColor(Color.parseColor("#7A7A7A"));
                             }
                             else {
+                                img2Text.setTextColor(Color.parseColor("#00AEF9"));
+
+                                img1Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img3Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img4Text.setTextColor(Color.parseColor("#7A7A7A"));
+
                                 qisSelected[0] = false;
                                 qisSelected[1] = true;
                                 qisSelected[2] = false;
                                 qisSelected[3] = false;
                             }
 
-                            if (!q2isPLAYING[0]) {
+                            if (!q2mp.isPlaying()) {
                                 q2isPLAYING[0] = true;
-                                q2mp.seekTo(0);
                                 q2mp.start();
-                            } else {
+                            } else if(q2mp.isPlaying()) {
                                 q2isPLAYING[0] = false;
                                 q2mp.seekTo(0);
                                 q2mp.start();
@@ -232,20 +277,26 @@ public class ImageQuestions extends AppCompatActivity {
                         public void onClick(View v) {
 
                             if(qisSelected[2]) {
+                                img3Text.setTextColor(Color.parseColor("#7A7A7A"));
                                 qisSelected[2] = false;
                             }
                             else {
+                                img3Text.setTextColor(Color.parseColor("#00AEF9"));
+
+                                img1Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img2Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img4Text.setTextColor(Color.parseColor("#7A7A7A"));
+
                                 qisSelected[0] = false;
                                 qisSelected[1] = false;
                                 qisSelected[2] = true;
                                 qisSelected[3] = false;
                             }
 
-                            if (!q3isPLAYING[0]) {
+                            if (!q3mp.isPlaying()) {
                                 q3isPLAYING[0] = true;
-                                q3mp.seekTo(0);
                                 q3mp.start();
-                            } else {
+                            } else if(q3mp.isPlaying()) {
                                 q3isPLAYING[0] = false;
                                 q3mp.seekTo(0);
                                 q3mp.start();
@@ -265,9 +316,16 @@ public class ImageQuestions extends AppCompatActivity {
                         public void onClick(View v) {
 
                             if(qisSelected[3]) {
+                                img4Text.setTextColor(Color.parseColor("#7A7A7A"));
                                 qisSelected[3] = false;
                             }
                             else {
+                                img4Text.setTextColor(Color.parseColor("#00AEF9"));
+
+                                img1Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img2Text.setTextColor(Color.parseColor("#7A7A7A"));
+                                img3Text.setTextColor(Color.parseColor("#7A7A7A"));
+
                                 qisSelected[0] = false;
                                 qisSelected[1] = false;
                                 qisSelected[2] = false;
@@ -275,11 +333,10 @@ public class ImageQuestions extends AppCompatActivity {
                             }
 
 
-                            if (!q4isPLAYING[0]) {
+                            if (!q4mp.isPlaying()) {
                                 q4isPLAYING[0] = true;
-                                q4mp.seekTo(0);
                                 q4mp.start();
-                            } else {
+                            } else if (q4mp.isPlaying()) {
                                 q4isPLAYING[0] = false;
                                 q4mp.seekTo(0);
                                 q4mp.start();
@@ -294,23 +351,11 @@ public class ImageQuestions extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Log.w(TAG, "Button stuff!");
-                            if(qisSelected[correctAnswr] == true) {
-                                prog.setProgress(prog.getProgress()+1);
-                                Toast.makeText(ImageQuestions.this, "You are correct!",
-                                        Toast.LENGTH_SHORT).show();
-                                /*FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child().addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });*/
-
+                            if(qisSelected[correctAnswr]) {
                                 if(buttonPressCount[0] == 0) {
+                                    prog.setProgress(prog.getProgress() + 1);
+                                    Toast.makeText(ImageQuestions.this, "You are correct!",
+                                            Toast.LENGTH_SHORT).show();
                                     if(index + 1 != QuestionCount) {
                                         ((Button) v).setText("Next");
                                     }
@@ -322,23 +367,47 @@ public class ImageQuestions extends AppCompatActivity {
                                     if(index + 1 != QuestionCount) {
 
                                         Intent intent = null;
+                                        // !! Update the other question formats to use "else if" for greater efficiency
                                         if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
                                             intent = new Intent(getApplicationContext(), Questions.class);
                                         }
-                                        if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
+                                        else if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
                                             intent = new Intent(getApplicationContext(), ImageQuestions.class);
                                         }
-                                        if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
+                                        else if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
                                             intent = new Intent(getApplicationContext(), dropdownQuestions.class);
                                         }
-                                        if(data.get(index+1).getString("type").compareToIgnoreCase("radio") == 0) {
+                                        else if(data.get(index+1).getString("type").contains("radio")) {
                                             intent = new Intent(getApplicationContext(), radioQuestions.class);
                                         }
-
                                         intent.putExtra("data", data);
                                         intent.putExtra("count", QuestionCount);
                                         intent.putExtra("index", index + 1);
                                         intent.putExtra("progress", prog.getProgress());
+
+                                        int mod = 0;
+                                        mod = getIntent().getExtras().getInt("module");
+                                        int exc = 0;
+                                        exc = getIntent().getExtras().getInt("exercise");
+                                        Log.w(TAG, "Mod:" + mod + " : " + exc);
+                                        intent.putExtra("module", mod);
+                                        intent.putExtra("exercise", exc);
+                                        startActivity(intent);
+                                    } else {
+                                        Intent intent = new Intent(getApplicationContext(), QuestionBlock.class);
+
+                                        /*intent.putExtra("data", data);
+                                        intent.putExtra("count", QuestionCount);
+                                        intent.putExtra("index", index + 1);
+                                        intent.putExtra("progress", prog.getProgress());*/
+
+                                        int mod = 0;
+                                        mod = getIntent().getExtras().getInt("module");
+                                        int exc = 0;
+                                        exc = getIntent().getExtras().getInt("exercise");
+                                        Log.w(TAG, "ModRawr:" + mod + " : " + exc);
+                                        intent.putExtra("module", mod);
+                                        intent.putExtra("exercise", exc);
                                         startActivity(intent);
                                     }
                                 }

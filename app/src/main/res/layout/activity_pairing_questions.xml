@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ukie.ukie.radioQuestions">
+    tools:context="com.ukie.ukie.pairingQuestions">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -15,22 +15,11 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:theme="@layout/toolbar"
+            android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_radio_questions"
-        android:id="@+id/include9" />
-
-    <Button
-        android:id="@+id/checkRadio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:background="#FFC107"
-        android:text="Check"
-        app:layout_anchor="@+id/include9"
-        app:layout_anchorGravity="bottom|center_horizontal" />
+    <include layout="@layout/content_pairing_questions" />
 
 </android.support.design.widget.CoordinatorLayout>

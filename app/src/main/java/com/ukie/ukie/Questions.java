@@ -144,7 +144,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                             if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
                                 intent = new Intent(getApplicationContext(), dropdownQuestions.class);
                             }
-                            if(data.get(index+1).getString("type").compareToIgnoreCase("radio") == 0) {
+                            if(data.get(index+1).getString("type").contains("radio")) {
                                 intent = new Intent(getApplicationContext(), radioQuestions.class);
                             }
 
@@ -152,6 +152,30 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                             intent.putExtra("count", QuestionCount);
                             intent.putExtra("index", index + 1);
                             intent.putExtra("progress", prog.getProgress());
+
+                            int mod = 0;
+                            mod = getIntent().getExtras().getInt("module");
+                            int exc = 0;
+                            exc = getIntent().getExtras().getInt("exercise");
+                            Log.w(TAG, "Mod:" + mod + " : " + exc);
+                            intent.putExtra("module", mod);
+                            intent.putExtra("exercise", exc);
+                            startActivity(intent);
+                        } else {
+                            Intent intent = new Intent(getApplicationContext(), QuestionBlock.class);
+
+                                        /*intent.putExtra("data", data);
+                                        intent.putExtra("count", QuestionCount);
+                                        intent.putExtra("index", index + 1);
+                                        intent.putExtra("progress", prog.getProgress());*/
+
+                            int mod = 0;
+                            mod = getIntent().getExtras().getInt("module");
+                            int exc = 0;
+                            exc = getIntent().getExtras().getInt("exercise");
+                            Log.w(TAG, "ModRawr:" + mod + " : " + exc);
+                            intent.putExtra("module", mod);
+                            intent.putExtra("exercise", exc);
                             startActivity(intent);
                         }
                     }

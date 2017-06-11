@@ -16,5 +16,10 @@
     <string name="title_activity_radio_questions">radioQuestions</string>
     <string name="title_activity_loading_screen">loadingScreen</string>
     <string name="title_activity_splash_screen">splashScreen</string>
+    <string name="title_activity_question_block">QuestionBlock</string>
+    <string name="title_activity_module">ModuleActivity</string>
+    <string name="title_activity_question_block_completed">QuestionBlockCompletedActivity</string>
+    <string name="title_activity_pairing_questions">pairingQuestions</string>
+    <string name="title_activity_drag_questions">DragQuestions</string>
 
 </resources>

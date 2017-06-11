@@ -112,6 +112,26 @@
         <activity
             android:name=".splashScreen"
             android:label="@string/title_activity_splash_screen"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".QuestionBlock"
+            android:label="@string/title_activity_question_block"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".ModuleActivity"
+            android:label="@string/title_activity_module"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".QuestionBlockCompletedActivity"
+            android:label="@string/title_activity_question_block_completed"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".pairingQuestions"
+            android:label="@string/title_activity_pairing_questions"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".DragQuestions"
+            android:label="@string/title_activity_drag_questions"
             android:theme="@style/AppTheme"></activity>
     </application>
 
