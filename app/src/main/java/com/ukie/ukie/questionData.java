@@ -44,6 +44,248 @@ public class questionData implements Serializable {
     String letter;
     String radioImg;
 
+    int _1pair1;
+    int _2pair1;
+    int _1pair2;
+    int _2pair2;
+    int _1pair3;
+    int _2pair3;
+    int _1pair4;
+    int _2pair4;
+    int _1pair5;
+    int _2pair5;
+    int _1pair6;
+    int _2pair6;
+
+    String _1pair1String;
+    String _2pair1String;
+    String _1pair2String;
+    String _2pair2String;
+    String _1pair3String;
+    String _2pair3String;
+    String _1pair4String;
+    String _2pair4String;
+    String _1pair5String;
+    String _2pair5String;
+    String _1pair6String;
+    String _2pair6String;
+
+    public int get1pair1() {
+        if(_1pair1 != -1) {
+            return _1pair1;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair1() {
+        if(_2pair1 != -1) {
+            return _2pair1;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get1pair2() {
+        if(_1pair2 != -1) {
+            return _1pair2;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair2() {
+        if(_2pair2 != -1) {
+            return _2pair2;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get1pair3() {
+        if(_1pair3 != -1) {
+            return _1pair3;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair3() {
+        if(_2pair3 != -1) {
+            return _2pair3;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get1pair4() {
+        if(_1pair4 != -1) {
+            return _1pair4;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair4() {
+        if(_2pair4 != -1) {
+            return _2pair4;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get1pair5() {
+        if(_1pair5 != -1) {
+            return _1pair5;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair5() {
+        if(_2pair5 != -1) {
+            return _2pair5;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get1pair6() {
+        if(_1pair6 != -1) {
+            return _1pair6;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public int get2pair6() {
+        if(_2pair6 != -1) {
+            return _2pair6;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    public String get1pair1String() {
+        if(_1pair1String != null) {
+            return _1pair1String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair1String() {
+        if(_2pair1String != null) {
+            return _2pair1String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get1pair2String() {
+        if(_1pair2String != null) {
+            return _1pair2String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair2String() {
+        if(_2pair2String != null) {
+            return _2pair2String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get1pair3String() {
+        if(_1pair3String != null) {
+            return _1pair3String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair3String() {
+        if(_2pair3String != null) {
+            return _2pair3String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get1pair4String() {
+        if(_1pair4String != null) {
+            return _1pair4String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair4String() {
+        if(_2pair4String != null) {
+            return _2pair4String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get1pair5String() {
+        if(_1pair5String != null) {
+            return _1pair5String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair5String() {
+        if(_2pair5String != null) {
+            return _2pair5String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get1pair6String() {
+        if(_1pair6String != null) {
+            return _1pair6String;
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String get2pair6String() {
+        if(_2pair6String != null) {
+            return _2pair6String;
+        }
+        else {
+            return null;
+        }
+    }
+    //
     public String getradioImg() {
         if(radioImg != null) {
             return radioImg;
@@ -183,6 +425,30 @@ public class questionData implements Serializable {
         switch(s) {
             case "correctAnswer":
                 return getCorrectAnswer();
+            case "1pair1":
+                return get1pair1();
+            case "2pair1":
+                return get2pair1();
+            case "1pair2":
+                return get1pair2();
+            case "2pair2":
+                return get2pair2();
+            case "1pair3":
+                return get1pair3();
+            case "2pair3":
+                return get2pair3();
+            case "1pair4":
+                return get1pair4();
+            case "2pair4":
+                return get2pair4();
+            case "1pair5":
+                return get1pair5();
+            case "2pair5":
+                return get2pair5();
+            case "1pair6":
+                return get1pair6();
+            case "2pair6":
+                return get2pair6();
         }
         return -1;
     }
@@ -240,6 +506,30 @@ public class questionData implements Serializable {
                 return getLetter();
             case "radioImg":
                 return getradioImg();
+            case "1pair1":
+                return get1pair1String();
+            case "2pair1":
+                return get2pair1String();
+            case "1pair2":
+                return get1pair2String();
+            case "2pair2":
+                return get2pair2String();
+            case "1pair3":
+                return get1pair3String();
+            case "2pair3":
+                return get2pair3String();
+            case "1pair4":
+                return get1pair4String();
+            case "2pair4":
+                return get2pair4String();
+            case "1pair5":
+                return get1pair5String();
+            case "2pair5":
+                return get2pair5String();
+            case "1pair6":
+                return get1pair6String();
+            case "2pair6":
+                return get2pair6String();
         }
         return null;
     }

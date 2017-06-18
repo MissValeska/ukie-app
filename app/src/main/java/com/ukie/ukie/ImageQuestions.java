@@ -3,6 +3,7 @@ package com.ukie.ukie;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.PictureDrawable;
+import android.media.MediaDrm;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions.withCrossFade;
 
@@ -60,6 +64,12 @@ public class ImageQuestions extends AppCompatActivity {
 
     final DatabaseReference FirebaseRef = FirebaseDatabase.getInstance().getReference();
 
+    MediaPlayer q1mp;
+    MediaPlayer q2mp;
+    MediaPlayer q3mp;
+    MediaPlayer q4mp;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +88,7 @@ public class ImageQuestions extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        if(mAuth.getCurrentUser() != null) {
+        //if(mAuth.getCurrentUser() != null) {
 
                     Intent intent = getIntent();
 
@@ -100,11 +110,6 @@ public class ImageQuestions extends AppCompatActivity {
                     String type = null;
 
                     int tmpInt = 0;
-
-                    String q1url = null;
-                    String q2url = null;
-                    String q3url = null;
-                    String q4url = null;
 
                     Log.w(TAG, data.get(index).getString("question-text"));
                     qText.setText(data.get(index).getString("question-text"));
@@ -138,20 +143,35 @@ public class ImageQuestions extends AppCompatActivity {
                         img3Text.setVisibility(View.VISIBLE);
                         img4Text.setVisibility(View.VISIBLE);
 
-                        q1url = data.get(index).getString("qImg1");
-                        q2url = data.get(index).getString("qImg2");
-                        q3url = data.get(index).getString("qImg3");
-                        q4url = data.get(index).getString("qImg4");
-                        // !! Consider changing to properly center the image, compared to the textviews below the images, and or reposition the textviews
-                        Picasso.with(q1.getContext()).load(q1url).fit().centerCrop().into(q1);
-                        Picasso.with(q2.getContext()).load(q2url).fit().centerCrop().into(q2);
-                        Picasso.with(q3.getContext()).load(q3url).fit().centerCrop().into(q3);
-                        Picasso.with(q4.getContext()).load(q4url).fit().centerCrop().into(q4);
+                        final String q1url = data.get(index).getString("qImg1");
+                        final String q2url = data.get(index).getString("qImg2");
+                        final String q3url = data.get(index).getString("qImg3");
+                        final String q4url = data.get(index).getString("qImg4");
 
-                        q1.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
-                        q2.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
-                        q3.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
-                        q4.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                        final FutureTask task = new FutureTask(new Callable() {
+                            @Override
+                            public Object call() throws Exception {
+                                Log.v(TAG, "Entered future task radioImage");
+                                // !! Consider changing to properly center the image, compared to the textviews below the images, and or reposition the textviews
+                                // !! Add a placeholder in case the image doesn't load for some reason
+                                // !! Consider modifying the code to start with a placeeholder image, and then add the proper image later
+                                // assuming that process doesn't make the placeholder visible on the screen, unless there are network problems
+                                // making the image take a while to load, which would otherwise result in the image buttons simply not being visible
+                                // !! Copy this code to all question formats and whatever else that use images.
+                                Picasso.with(q1.getContext()).load(q1url).fit().centerCrop().into(q1);
+                                Picasso.with(q2.getContext()).load(q2url).fit().centerCrop().into(q2);
+                                Picasso.with(q3.getContext()).load(q3url).fit().centerCrop().into(q3);
+                                Picasso.with(q4.getContext()).load(q4url).fit().centerCrop().into(q4);
+
+                                q1.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                                q2.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                                q3.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                                q4.setBackgroundColor(getResources().getColor(R.color.tw__transparent));
+                                return null;
+                            }
+                        });
+                        task.run();
+
                     }
                     else if(type.compareToIgnoreCase("audio") == 0) {
                         Log.w(TAG, "OMG");
@@ -187,13 +207,88 @@ public class ImageQuestions extends AppCompatActivity {
 
                     final boolean[] qisSelected = {false, false, false, false};
 
-                    final MediaPlayer q1mp = new MediaPlayer();
-                    try {
-                        q1mp.setDataSource(audioList.get(0));
-                        q1mp.prepare();
-                    } catch (IOException e) {
-                        Log.e(TAG, "q2 prepare() failed");
+
+                    final FutureTask task1 = new FutureTask(new Callable() {
+                        @Override
+                        public Object call() throws Exception {
+                            try {
+                                q1mp = new MediaPlayer();
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                q1mp.setDataSource(audioList.get(0));
+                                q1mp.prepare();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                e.getMessage();
+                            }
+                            return q1mp;
+                        }
+                    });
+                    task1.run();
+                final FutureTask task2 = new FutureTask(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        try {
+                            q2mp = new MediaPlayer();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            q2mp.setDataSource(audioList.get(1));
+                            q2mp.prepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            e.getMessage();
+                        }
+                        return q2mp;
                     }
+                });
+                task2.run();
+                final FutureTask task3 = new FutureTask(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        try {
+                            q3mp = new MediaPlayer();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            q3mp.setDataSource(audioList.get(2));
+                            q3mp.prepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            e.getMessage();
+                        }
+                        return q3mp;
+                    }
+                });
+                task3.run();
+                final FutureTask task4 = new FutureTask(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        try {
+                            q4mp = new MediaPlayer();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            q4mp.setDataSource(audioList.get(3));
+                            q4mp.prepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            e.getMessage();
+                        }
+                        return q4mp;
+                    }
+                });
+                task4.run();
+
                     q1.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -214,25 +309,20 @@ public class ImageQuestions extends AppCompatActivity {
                                 qisSelected[2] = false;
                                 qisSelected[3] = false;
                             }
-
-                            if (!q1mp.isPlaying()) {
-                                q1isPLAYING[0] = true;
-                                q1mp.start();
-                            } else if(q1mp.isPlaying()) {
-                                q1isPLAYING[0] = false;
-                                q1mp.seekTo(0);
-                                q1mp.start();
-                            }
+                            do {
+                                if (task1.isDone()) {
+                                    if (!q1mp.isPlaying()) {
+                                        q1mp.start();
+                                    } else if (q1mp.isPlaying()) {
+                                        q1mp.seekTo(0);
+                                        q1mp.start();
+                                    }
+                                }
+                            } while(!task1.isDone());
 
                         }
                     });
-                    final MediaPlayer q2mp = new MediaPlayer();
-                    try {
-                        q2mp.setDataSource(audioList.get(1));
-                        q2mp.prepare();
-                    } catch (IOException e) {
-                        Log.e(TAG, "q2 prepare() failed");
-                    }
+
                     q2.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -254,24 +344,20 @@ public class ImageQuestions extends AppCompatActivity {
                                 qisSelected[3] = false;
                             }
 
-                            if (!q2mp.isPlaying()) {
-                                q2isPLAYING[0] = true;
-                                q2mp.start();
-                            } else if(q2mp.isPlaying()) {
-                                q2isPLAYING[0] = false;
-                                q2mp.seekTo(0);
-                                q2mp.start();
-                            }
+                            do {
+                                if (task2.isDone()) {
+                                    if (!q2mp.isPlaying()) {
+                                        q2mp.start();
+                                    } else if (q2mp.isPlaying()) {
+                                        q2mp.seekTo(0);
+                                        q2mp.start();
+                                    }
+                                }
+                            } while(!task2.isDone());
 
                         }
                     });
-                    final MediaPlayer q3mp = new MediaPlayer();
-                    try {
-                        q3mp.setDataSource(audioList.get(2));
-                        q3mp.prepare();
-                    } catch (IOException e) {
-                        Log.e(TAG, "q3 prepare() failed");
-                    }
+
                     q3.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -293,24 +379,20 @@ public class ImageQuestions extends AppCompatActivity {
                                 qisSelected[3] = false;
                             }
 
-                            if (!q3mp.isPlaying()) {
-                                q3isPLAYING[0] = true;
-                                q3mp.start();
-                            } else if(q3mp.isPlaying()) {
-                                q3isPLAYING[0] = false;
-                                q3mp.seekTo(0);
-                                q3mp.start();
-                            }
+                            do {
+                                if (task3.isDone()) {
+                                    if (!q3mp.isPlaying()) {
+                                        q3mp.start();
+                                    } else if (q3mp.isPlaying()) {
+                                        q3mp.seekTo(0);
+                                        q3mp.start();
+                                    }
+                                }
+                            } while(!task3.isDone());
 
                         }
                     });
-                    final MediaPlayer q4mp = new MediaPlayer();
-                    try {
-                        q4mp.setDataSource(audioList.get(3));
-                        q4mp.prepare();
-                    } catch (IOException e) {
-                        Log.e(TAG, "q4 prepare() failed");
-                    }
+
                     q4.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -333,14 +415,16 @@ public class ImageQuestions extends AppCompatActivity {
                             }
 
 
-                            if (!q4mp.isPlaying()) {
-                                q4isPLAYING[0] = true;
-                                q4mp.start();
-                            } else if (q4mp.isPlaying()) {
-                                q4isPLAYING[0] = false;
-                                q4mp.seekTo(0);
-                                q4mp.start();
-                            }
+                            do {
+                                if (task4.isDone()) {
+                                    if (!q4mp.isPlaying()) {
+                                        q4mp.start();
+                                    } else if (q4mp.isPlaying()) {
+                                        q4mp.seekTo(0);
+                                        q4mp.start();
+                                    }
+                                }
+                            } while(!task4.isDone());
 
                         }
                     });
@@ -380,6 +464,13 @@ public class ImageQuestions extends AppCompatActivity {
                                         else if(data.get(index+1).getString("type").contains("radio")) {
                                             intent = new Intent(getApplicationContext(), radioQuestions.class);
                                         }
+                                        else if (data.get(index + 1).getString("type").compareToIgnoreCase("drag") == 0) {
+                                            intent = new Intent(getApplicationContext(), DragQuestions.class);
+                                        }
+                                        else if (data.get(index + 1).getString("type").compareToIgnoreCase("pairs") == 0) {
+                                            intent = new Intent(getApplicationContext(), pairingQuestions.class);
+                                        }
+
                                         intent.putExtra("data", data);
                                         intent.putExtra("count", QuestionCount);
                                         intent.putExtra("index", index + 1);
@@ -393,6 +484,7 @@ public class ImageQuestions extends AppCompatActivity {
                                         intent.putExtra("module", mod);
                                         intent.putExtra("exercise", exc);
                                         startActivity(intent);
+                                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                     } else {
                                         Intent intent = new Intent(getApplicationContext(), QuestionBlock.class);
 
@@ -409,6 +501,7 @@ public class ImageQuestions extends AppCompatActivity {
                                         intent.putExtra("module", mod);
                                         intent.putExtra("exercise", exc);
                                         startActivity(intent);
+                                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                     }
                                 }
                             }
@@ -420,16 +513,32 @@ public class ImageQuestions extends AppCompatActivity {
                         }
                     });
 
-                }
+                //} //mAuth.getCurrentUser() != null
 
-        else {
+        /*else {
             Toast.makeText(this, "You are not signed in, please go sign in now.",
                     Toast.LENGTH_LONG).show();
             Intent intent = new Intent(this, google_login.class);
             startActivity(intent);
-        }
+        }*/
 
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        q1mp.stop();
+        q1mp.release();
+
+        q2mp.stop();
+        q2mp.release();
+
+        q3mp.stop();
+        q3mp.release();
+
+        q4mp.stop();
+        q4mp.release();
     }
 
 }

@@ -1,15 +1,21 @@
 package com.ukie.ukie;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -18,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,6 +52,7 @@ public class ModuleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_module);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         class MyListAdapter extends ArrayAdapter<ExerciseData> {
 
@@ -107,13 +115,15 @@ public class ModuleActivity extends AppCompatActivity {
 
                     ModuleCount = snapshot.child("ModuleNum").getValue(int.class);
                     Log.w(TAG, String.valueOf(ModuleCount));
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    Log.w(TAG, "Is logged in?:" + String.valueOf(mAuth.getCurrentUser()));
 
                     ArrayList<ExerciseData> dataList = new ArrayList<ExerciseData>();
 
                     for (int d = 1; d <= ModuleCount; d++) {
-                        String url = snapshot.child("Module" + String.valueOf(d)).child("ModuleData").child("text").getValue(String.class);
-                        String text = snapshot.child("Module" + String.valueOf(d)).child("ModuleData").child("url").getValue(String.class);
-                        dataList.add(new ExerciseData(text, url, -1, d, -1));
+                        String url = snapshot.child("Module" + String.valueOf(d)).child("ModuleData").child("url").getValue(String.class);
+                        String text = snapshot.child("Module" + String.valueOf(d)).child("ModuleData").child("text").getValue(String.class);
+                        dataList.add(new ExerciseData(url, text, -1, d, -1));
                         Log.w(TAG, "Yo:" + dataList.get(d - 1).getText() + " : " + dataList.get(d - 1).getUrl() + " : " + dataList.get(d - 1).getExercise());
                     }
 
@@ -132,6 +142,45 @@ public class ModuleActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void onUpButtonPressed() {
+        Intent upIntent = NavUtils.getParentActivityIntent(ModuleActivity.this);
+
+        if (NavUtils.shouldUpRecreateTask(ModuleActivity.this, upIntent)) {
+            // This activity is NOT part of this app's task, so create a new task
+            // when navigating up, with a synthesized back stack.
+            TaskStackBuilder.create(ModuleActivity.this)
+                    // Add all of this activity's parents to the back stack
+                    .addNextIntentWithParentStack(upIntent)
+                    // Navigate up to the closest parent
+                    .startActivities();
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        } else {
+            // This activity is part of this app's task, so simply
+            // navigate up to the logical parent activity.
+            NavUtils.navigateUpTo(ModuleActivity.this, upIntent);
+            // !! Fix these weird and broken animations
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onUpButtonPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG, "Back button pressed! Omg!");
+        onUpButtonPressed();
     }
 
 }

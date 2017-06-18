@@ -1,13 +1,19 @@
 package com.ukie.ukie;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +28,10 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,10 +45,15 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import io.fabric.sdk.android.Fabric;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = "SignInActivity";
 
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
@@ -54,24 +69,68 @@ public class MainActivity extends AppCompatActivity {
     FeedReaderDbHelper mDbHelper = new FeedReaderDbHelper(this);
     public static final String EXTRA_MESSAGE = "com.ukie.ukie.MESSAGE";
 
+    public GoogleApiClient mGoogleApiClient;
+
+    Drawer drawerResult;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        findViewById(R.id.fragment).setVisibility(View.GONE);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        if(mAuth.getCurrentUser() == null) {
+            FragmentManager fm = getFragmentManager();
+
+// add
+            String serverID = "723836520365-n1bevgandt9o3s35gsnu2het64h50s9a.apps.googleusercontent.com";
+
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestIdToken(serverID).requestProfile()
+                    .build();
+
+            final splashScreen splash = new splashScreen();
+
+            // Build a GoogleApiClient with access to the Google Sign-In API and the
+            // options specified by gso.
+            GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this /* FragmentActivity */, splash /* OnConnectionFailedListener */)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+
+            final FragmentTransaction ft = fm.beginTransaction();
+            //ft.setTransition();
+            findViewById(R.id.fragment).setVisibility(View.VISIBLE);
+            splash.mGoogleApiClient = mGoogleApiClient;
+            ft.add(R.id.fragment, splash);
+// alternatively add it with a tag
+// trx.add(R.id.your_placehodler, new YourFragment(), "detail");
+            ft.commit();
+            FutureTask task1 = new FutureTask(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    while(!splash.notify) {
+                    }
+                    if(splash.notify) {
+                        ft.remove(splash);
+                    }
+                    return null;
+                }
+            });
+            task1.run();
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-
         //create the drawer and remember the `Drawer` result object
-        Drawer result = new DrawerBuilder()
+        drawerResult = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
                 .addDrawerItems(
@@ -97,9 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-
-        mAuth = FirebaseAuth.getInstance();
+        drawerResult.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -201,8 +258,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
              case 2:
-                intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                 drawerResult.closeDrawer();
+                 drawerResult.deselect();
+                /*intent = new Intent(this, MainActivity.class);
+                startActivity(intent);*/
                 break;
             case 3:
                 intent = new Intent(this, ModuleActivity.class);
@@ -327,4 +386,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }

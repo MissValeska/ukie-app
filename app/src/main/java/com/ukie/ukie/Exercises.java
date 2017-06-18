@@ -1,6 +1,7 @@
 package com.ukie.ukie;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -12,12 +13,16 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -87,6 +92,7 @@ public class Exercises extends AppCompatActivity {
         setContentView(R.layout.activity_exercises);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final Intent intent = getIntent();
 
@@ -152,16 +158,17 @@ public class Exercises extends AppCompatActivity {
                                                                      String firstType = null;
 
                                                                      ExerciseCount = snapshot.child("ExerciseNum").getValue(int.class);
-                                                                     Log.w(TAG, String.valueOf(ExerciseCount));
+                                                                     Log.w(TAG, "Exercise Number:" + String.valueOf(ExerciseCount));
 
                                                                      ArrayList<ExerciseData> dataList = new ArrayList<ExerciseData>();
 
                                                                      for (int d = 1; d <= ExerciseCount; d++) {
-                                                                         String url = snapshot.child("Exercise" + String.valueOf(d)).child("ExerciseData").child("text").getValue(String.class);
-                                                                         String text = snapshot.child("Exercise" + String.valueOf(d)).child("ExerciseData").child("url").getValue(String.class);
+                                                                         String url = snapshot.child("Exercise" + String.valueOf(d)).child("ExerciseData").child("url").getValue(String.class);
+                                                                         String text = snapshot.child("Exercise" + String.valueOf(d)).child("ExerciseData").child("text").getValue(String.class);
+                                                                         Log.v(TAG, "I hope this works" + text + " : " + url);
                                                                          //int exercise = snapshot.child("Exercise" + String.valueOf(d)).child("ExerciseData").child("Exercise").getValue(int.class);
                                                                          // !! Change the module parameter to update itself auotmatically
-                                                                         dataList.add(new ExerciseData(text, url, d, mod, -1));
+                                                                         dataList.add(new ExerciseData(url, text, d, mod, -1));
                                                                          Log.w(TAG, "Yo:" + dataList.get(d - 1).getText() + " : " + dataList.get(d - 1).getUrl() + " : " + dataList.get(d - 1).getExercise());
                                                                      }
 
@@ -178,13 +185,13 @@ public class Exercises extends AppCompatActivity {
                                                              });
 
 
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         //fab.setImageIcon();
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                FirebaseRef.child("Exercises").addValueEventListener(new ValueEventListener() {
+                FirebaseRef.child("Modules").child("Module" + String.valueOf(mod)).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot snapshot) {
                         Log.w(TAG, snapshot.getValue().toString());
@@ -216,7 +223,7 @@ public class Exercises extends AppCompatActivity {
                            }
                         });*/
 
-                        for (int d = 1; d <= ExerciseCount; d++) {
+                        /*for (int d = 1; d <= ExerciseCount; d++) {
                             QuestionCount = snapshot.child("Exercise" + String.valueOf(d)).child("QuestionNum").getValue(int.class);
                                 for (int i = 1; i <= QuestionCount; i++) {
                                     /*questionData tmp = new questionData();
@@ -231,7 +238,7 @@ public class Exercises extends AppCompatActivity {
                                     }
                                     tmp.questionText = snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("questionText").getValue(String.class);
                                     data.add(tmp);*/
-                                    Log.w(TAG, snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
+                                    /*Log.w(TAG, snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
                                     Gson gson = new Gson();
                                     if(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class).compareToIgnoreCase("audio") == 0) {
                                         questionData tmp = new questionData();
@@ -295,7 +302,7 @@ public class Exercises extends AppCompatActivity {
                                         typeList.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
                                         urlArr.add(snapshot.child("Exercise" + String.valueOf(d)).child("Question" + String.valueOf(i)).child("type").getValue(String.class));
                                     }*/
-                                    Log.w(TAG, "HAI");
+                                    /*Log.w(TAG, "HAI");
                                 }
                             }
                         Log.w(TAG, firstType);
@@ -327,8 +334,50 @@ public class Exercises extends AppCompatActivity {
                     }
                 });
             }
-        });
+        });*/
 
+    }
+
+    public void onUpButtonPressed() {
+        Intent upIntent = NavUtils.getParentActivityIntent(Exercises.this);
+
+
+        upIntent.putExtra("module", getIntent().getExtras().getInt("module"));
+
+        if (NavUtils.shouldUpRecreateTask(Exercises.this, upIntent)) {
+            // This activity is NOT part of this app's task, so create a new task
+            // when navigating up, with a synthesized back stack.
+            TaskStackBuilder.create(Exercises.this)
+                    // Add all of this activity's parents to the back stack
+                    .addNextIntentWithParentStack(upIntent)
+                    // Navigate up to the closest parent
+                    .startActivities();
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        } else {
+            // This activity is part of this app's task, so simply
+            // navigate up to the logical parent activity.
+            NavUtils.navigateUpTo(Exercises.this, upIntent);
+            // !! Fix these weird and broken animations
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onUpButtonPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG, "Back button pressed! Omg!");
+        onUpButtonPressed();
     }
 
     @Override

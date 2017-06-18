@@ -1,6 +1,7 @@
 package com.ukie.ukie;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -9,11 +10,16 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -60,6 +66,7 @@ public class QuestionBlockCompletedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_question_block_completed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final Intent intent = getIntent();
 
@@ -165,10 +172,14 @@ public class QuestionBlockCompletedActivity extends AppCompatActivity {
             correctPercentage = tmpCorrect / tmpIncorrect;
         }
 
-        entries.add(new PieEntry(correctPercentage, 0));
-        entries.add(new PieEntry(incorrectPercentage, 1));
-        entries.get(0).setLabel("Correct");
-        entries.get(1).setLabel("Incorrect");
+        if(tmpCorrect != 0) {
+            entries.add(new PieEntry(tmpCorrect, 0));
+            entries.get(0).setLabel("Correct");
+        }
+        if(tmpIncorrect != 0) {
+            entries.add(new PieEntry(tmpIncorrect, 1));
+            entries.get(1).setLabel("Incorrect");
+        }
 
         PieDataSet dataset = new PieDataSet(entries, "Correct versus Incorrect Answers");
 
@@ -267,6 +278,106 @@ public class QuestionBlockCompletedActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void onUpButtonPressed() {
+
+        onBackPressed();
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onUpButtonPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG, "Back button pressed! Omg!");
+
+        // !! Consider changing the message, as no data should be lost AFAIK (ensure this!)
+
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage("Are you sure you want to exit? You will lose all progress.")
+                .setTitle("Exit Lesson");
+
+// Add the buttons
+        builder.setPositiveButton("Yes, I'm sure (Так)", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                Intent upIntent = NavUtils.getParentActivityIntent(QuestionBlockCompletedActivity.this);
+
+                int mod = 0;
+                mod = getIntent().getExtras().getInt("module");
+                int exc = 0;
+                exc = getIntent().getExtras().getInt("exercise");
+                int qBlock = 0;
+                qBlock = getIntent().getExtras().getInt("questionBlock");
+                Log.w(TAG, "ModRawr:" + mod + " : " + exc);
+
+                upIntent.putExtra("module", mod);
+                upIntent.putExtra("exercise", exc);
+                upIntent.putExtra("questionBlock", qBlock);
+                upIntent.putExtra("count", QuestionCount);
+                // !! Add a question block completed boolean somewhere which is passed to the QuestionBlock activity
+                // Indicating that it is completed, and enabling the next QuestionBlock within the Exercise.
+
+                if (NavUtils.shouldUpRecreateTask(QuestionBlockCompletedActivity.this, upIntent)) {
+                    // This activity is NOT part of this app's task, so create a new task
+                    // when navigating up, with a synthesized back stack.
+                    TaskStackBuilder.create(QuestionBlockCompletedActivity.this)
+                            // Add all of this activity's parents to the back stack
+                            .addNextIntentWithParentStack(upIntent)
+                            // Navigate up to the closest parent
+                            .startActivities();
+                    overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+                    dialog.cancel();
+                } else {
+                    // This activity is part of this app's task, so simply
+                    // navigate up to the logical parent activity.
+                    NavUtils.navigateUpTo(QuestionBlockCompletedActivity.this, upIntent);
+                    // !! Fix these weird and broken animations
+                    overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+                    dialog.cancel();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog
+                Log.v(TAG, "regular cancel");
+                dialog.cancel();
+            }
+        });
+
+        builder.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    Log.v(TAG, "back button cancel");
+                    dialog.cancel();
+                }
+                return false;
+            }
+        });
+
+
+// Set other dialog properties
+
+
+// Create the AlertDialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 }

@@ -107,7 +107,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                 if (prog.getProgress() != prog.getMax()) {
                     prog.setProgress(prog.getProgress() + 1);
                 }
-                final boolean[] ran = {false};
+                /*final boolean[] ran = {false};
                 FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("correct").child(getConj("conj")).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -124,7 +124,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                 });
                 if(!ran[0]) {
                     FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("correct").child(getConj("conj")).setValue(1);
-                }
+                }*/
                 Log.w(TAG, "Victory!");
 
                 FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
@@ -138,14 +138,20 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                             if(data.get(index+1).getString("type").compareToIgnoreCase("text") == 0) {
                                 intent = new Intent(getApplicationContext(), Questions.class);
                             }
-                            if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
+                            else if(data.get(index+1).getString("type").compareToIgnoreCase("audio") == 0 || data.get(index+1).getString("type").compareToIgnoreCase("image") == 0) {
                                 intent = new Intent(getApplicationContext(), ImageQuestions.class);
                             }
-                            if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
+                            else if(data.get(index+1).getString("type").compareToIgnoreCase("dropdown") == 0) {
                                 intent = new Intent(getApplicationContext(), dropdownQuestions.class);
                             }
-                            if(data.get(index+1).getString("type").contains("radio")) {
+                            else if(data.get(index+1).getString("type").contains("radio")) {
                                 intent = new Intent(getApplicationContext(), radioQuestions.class);
+                            }
+                            else if (data.get(index + 1).getString("type").compareToIgnoreCase("drag") == 0) {
+                                intent = new Intent(getApplicationContext(), DragQuestions.class);
+                            }
+                            else if (data.get(index + 1).getString("type").compareToIgnoreCase("pairs") == 0) {
+                                intent = new Intent(getApplicationContext(), pairingQuestions.class);
                             }
 
                             intent.putExtra("data", data);
@@ -161,6 +167,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                             intent.putExtra("module", mod);
                             intent.putExtra("exercise", exc);
                             startActivity(intent);
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                         } else {
                             Intent intent = new Intent(getApplicationContext(), QuestionBlock.class);
 
@@ -177,6 +184,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                             intent.putExtra("module", mod);
                             intent.putExtra("exercise", exc);
                             startActivity(intent);
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                         }
                     }
                 });
@@ -189,7 +197,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                 if (prog.getProgress() != 0) {
                     prog.setProgress(prog.getProgress() - 1);
                 }
-                final boolean[] ran = {false};
+                /*final boolean[] ran = {false};
                 FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("incorrect").child(getConj("conj")).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -206,7 +214,7 @@ public class Questions extends AppCompatActivity implements View.OnKeyListener {
                 });
                 if(!ran[0]) {
                     FirebaseRef.child("users").child(mAuth.getCurrentUser().getUid()).child("wordList").child("incorrect").child(getConj("conj")).setValue(1);
-                }
+                }*/
             }
         }
             return false;

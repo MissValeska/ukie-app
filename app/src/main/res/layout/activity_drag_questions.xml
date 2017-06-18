@@ -20,58 +20,8 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_gravity="bottom|right"
-        android:background="@color/tw__transparent"
-        app:layout_anchor="@+id/include10"
-        app:layout_anchorGravity="top|left"
-        app:srcCompat="@android:drawable/toast_frame" />
-
-    <TextView
-        android:id="@+id/textView18"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:text="яблуко"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        app:layout_anchor="@+id/include10"
-        app:layout_anchorGravity="center_vertical|center_horizontal" />
-
-    <ImageButton
-        android:id="@+id/imageButton3"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_gravity="bottom|left"
-        android:background="@color/tw__transparent"
-        app:layout_anchor="@+id/include10"
-        app:layout_anchorGravity="top|right"
-        app:srcCompat="@android:drawable/toast_frame" />
-
     <include
         android:id="@+id/include10"
         layout="@layout/content_drag_questions" />
-
-    <ImageButton
-        android:id="@+id/imageButton4"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_gravity="top|right"
-        android:background="@color/tw__transparent"
-        app:layout_anchor="@+id/include10"
-        app:layout_anchorGravity="bottom|left"
-        app:srcCompat="@android:drawable/toast_frame" />
-
-    <ImageButton
-        android:id="@+id/imageButton5"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_gravity="top|left"
-        android:background="@color/tw__transparent"
-        app:layout_anchor="@+id/include10"
-        app:layout_anchorGravity="bottom|right"
-        app:srcCompat="@android:drawable/toast_frame" />
 
 </android.support.design.widget.CoordinatorLayout>

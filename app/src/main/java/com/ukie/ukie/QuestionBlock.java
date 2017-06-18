@@ -1,17 +1,23 @@
 package com.ukie.ukie;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -30,6 +36,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 public class QuestionBlock extends AppCompatActivity {
 
@@ -48,10 +56,11 @@ public class QuestionBlock extends AppCompatActivity {
         setContentView(R.layout.activity_question_block);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Intent rawr = new Intent(getApplicationContext(), DragQuestions.class);
+        //Intent rawr = new Intent(getApplicationContext(), DragQuestions.class);
 
-        startActivity(rawr);
+        //startActivity(rawr);
 
         final Intent intent = getIntent();
         // !! Whatever data is passed likely doesn't matter
@@ -101,9 +110,19 @@ public class QuestionBlock extends AppCompatActivity {
                     public void onClick(View v) {
                         Log.w(TAG, "Does this work?");
 
+                        /*FutureTask future = new FutureTask(new Callable() {
+                            @Override
+                            public Object call() throws Exception {*/
+
+
+                        final long time1= System.currentTimeMillis();
+
+
                         FirebaseRef.child("Modules").child("Module" + String.valueOf(exercise.getModule())).child("Exercise" + String.valueOf(exercise.getExercise())).child("QuestionBlock" + String.valueOf(position+1)).addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot snapshot) {
+                                long time2= System.currentTimeMillis();
+                                Log.w(TAG, "Time differential:" + String.valueOf(time2-time1));
                                 if(snapshot.exists()) {
                                     Log.w(TAG, snapshot.getValue().toString());
                                     String firstType = null;
@@ -111,6 +130,12 @@ public class QuestionBlock extends AppCompatActivity {
                                     Log.w(TAG, "Mod:" + exercise.getModule() + " : " + exercise.getExercise());
 
                                     QuestionCount = snapshot.child("QuestionNum").getValue(int.class);
+
+
+
+
+
+
                                     Log.w(TAG, String.valueOf(QuestionBlockCount));
                                     for (int i = 1; i <= QuestionCount; i++) {
                                         Log.w(TAG, snapshot.child("Question" + String.valueOf(i)).child("type").getValue(String.class));
@@ -188,7 +213,41 @@ public class QuestionBlock extends AppCompatActivity {
                                             tmp.radioText4 = snapshot.child("Question" + String.valueOf(i)).child("radioText4").getValue(String.class);
                                             tmp.questionText = snapshot.child("Question" + String.valueOf(i)).child("questionText").getValue(String.class);
                                             data.add(tmp);
-                                        } else {
+                                        }
+                                        else if (snapshot.child("Question" + String.valueOf(i)).child("type").getValue(String.class).compareToIgnoreCase("drag") == 0) {
+                                            questionData tmp = new questionData();
+                                            tmp.type = snapshot.child("Question" + String.valueOf(i)).child("type").getValue(String.class);
+                                            tmp.correctAnswer = snapshot.child("Question" + String.valueOf(i)).child("correctAnswer").getValue(int.class);
+                                            tmp.qImg1 = snapshot.child("Question" + String.valueOf(i)).child("qImg1").getValue(String.class);
+                                            tmp.qImg2 = snapshot.child("Question" + String.valueOf(i)).child("qImg2").getValue(String.class);
+                                            tmp.qImg3 = snapshot.child("Question" + String.valueOf(i)).child("qImg3").getValue(String.class);
+                                            tmp.qImg4 = snapshot.child("Question" + String.valueOf(i)).child("qImg4").getValue(String.class);
+                                            tmp.questionText = snapshot.child("Question" + String.valueOf(i)).child("questionText").getValue(String.class);
+                                            data.add(tmp);
+                                            Log.v(TAG, "What's going on?");
+                                        }
+                                        else if (snapshot.child("Question" + String.valueOf(i)).child("type").getValue(String.class).compareToIgnoreCase("pairs") == 0) {
+                                            questionData tmp = new questionData();
+                                            tmp.type = snapshot.child("Question" + String.valueOf(i)).child("type").getValue(String.class);
+                                            tmp.questionText = snapshot.child("Question" + String.valueOf(i)).child("questionText").getValue(String.class);
+                                            // !! Add voice clips which are played when the TextViews are selected
+                                            // !! Add text to put into the TextViews
+                                            tmp._1pair1 = snapshot.child("Question" + String.valueOf(i)).child("1pair1").getValue(int.class);
+                                            tmp._2pair1 = snapshot.child("Question" + String.valueOf(i)).child("2pair1").getValue(int.class);
+                                            tmp._1pair2 = snapshot.child("Question" + String.valueOf(i)).child("1pair2").getValue(int.class);
+                                            tmp._2pair2 = snapshot.child("Question" + String.valueOf(i)).child("2pair2").getValue(int.class);
+                                            tmp._1pair3 = snapshot.child("Question" + String.valueOf(i)).child("1pair3").getValue(int.class);
+                                            tmp._2pair3 = snapshot.child("Question" + String.valueOf(i)).child("2pair3").getValue(int.class);
+                                            tmp._1pair4 = snapshot.child("Question" + String.valueOf(i)).child("1pair4").getValue(int.class);
+                                            tmp._2pair4 = snapshot.child("Question" + String.valueOf(i)).child("2pair4").getValue(int.class);
+                                            tmp._1pair5 = snapshot.child("Question" + String.valueOf(i)).child("1pair5").getValue(int.class);
+                                            tmp._2pair5 = snapshot.child("Question" + String.valueOf(i)).child("2pair5").getValue(int.class);
+                                            tmp._1pair6 = snapshot.child("Question" + String.valueOf(i)).child("1pair6").getValue(int.class);
+                                            tmp._2pair6 = snapshot.child("Question" + String.valueOf(i)).child("2pair6").getValue(int.class);
+                                            data.add(tmp);
+                                            Log.v(TAG, "What's going on?");
+                                        }
+                                        else {
                                             data.add(gson.fromJson(snapshot.child("Question" + String.valueOf(i)).getValue().toString(), questionData.class));
                                         }
                                         if (i == 1) {
@@ -201,15 +260,22 @@ public class QuestionBlock extends AppCompatActivity {
                                     if (firstType.compareToIgnoreCase("text") == 0) {
                                         intent = new Intent(getApplicationContext(), Questions.class);
                                     }
-                                    if (firstType.compareToIgnoreCase("audio") == 0 || firstType.compareToIgnoreCase("image") == 0) {
+                                    else if (firstType.compareToIgnoreCase("audio") == 0 || firstType.compareToIgnoreCase("image") == 0) {
                                         intent = new Intent(getApplicationContext(), ImageQuestions.class);
                                     }
-                                    if (firstType.compareToIgnoreCase("dropdown") == 0) {
+                                    else if (firstType.compareToIgnoreCase("dropdown") == 0) {
                                         intent = new Intent(getApplicationContext(), dropdownQuestions.class);
                                     }
-                                    if (firstType.contains("radio")) {
+                                    else if (firstType.contains("radio")) {
                                         intent = new Intent(getApplicationContext(), radioQuestions.class);
                                     }
+                                    else if (firstType.compareToIgnoreCase("drag") == 0) {
+                                        intent = new Intent(getApplicationContext(), DragQuestions.class);
+                                    }
+                                    else if (firstType.compareToIgnoreCase("pairs") == 0) {
+                                        intent = new Intent(getApplicationContext(), pairingQuestions.class);
+                                    }
+
                                     Log.w(TAG, String.valueOf(data.size()));
                                     intent.putExtra("data", data);
                                     intent.putExtra("count", QuestionCount);
@@ -225,6 +291,8 @@ public class QuestionBlock extends AppCompatActivity {
 
                                     intent.putIntegerArrayListExtra("correctCount", correctCount);
                                     intent.putIntegerArrayListExtra("incorrectCount", incorrectCount);
+                                    long time3= System.currentTimeMillis();
+                                    Log.w(TAG, "Time differential1:" + String.valueOf(time3-time1) + "Time differential2:" + String.valueOf(time3-time2));
                                     startActivity(intent);
                                 }
                                 else {
@@ -236,6 +304,9 @@ public class QuestionBlock extends AppCompatActivity {
                             public void onCancelled(DatabaseError databaseError) {
                             }
                         });
+                             /*   return null;
+                            }
+                        });*/
                     }
                 });
 
@@ -264,10 +335,10 @@ public class QuestionBlock extends AppCompatActivity {
                     ArrayList<ExerciseData> dataList = new ArrayList<ExerciseData>();
 
                     for (int d = 1; d <= QuestionBlockCount; d++) {
-                        String url = snapshot.child("QuestionBlock" + String.valueOf(d)).child("QuestionBlockData").child("text").getValue(String.class);
-                        String text = snapshot.child("QuestionBlock" + String.valueOf(d)).child("QuestionBlockData").child("url").getValue(String.class);
+                        String url = snapshot.child("QuestionBlock" + String.valueOf(d)).child("QuestionBlockData").child("url").getValue(String.class);
+                        String text = snapshot.child("QuestionBlock" + String.valueOf(d)).child("QuestionBlockData").child("text").getValue(String.class);
                         //int exercise = snapshot.child("QuestionBlock" + String.valueOf(d)).child("QuestionBlockData").child("Exercise").getValue(int.class);
-                        dataList.add(new ExerciseData(text, url, finalExc, finalMod, d));
+                        dataList.add(new ExerciseData(url, text, finalExc, finalMod, d));
                         Log.w(TAG, "Yo:" + dataList.get(d - 1).getText() + " : " + dataList.get(d - 1).getUrl() + " : " + dataList.get(d - 1).getExercise());
                     }
 
@@ -287,6 +358,48 @@ public class QuestionBlock extends AppCompatActivity {
         });
 
 
+    }
+
+    public void onUpButtonPressed() {
+        Intent upIntent = NavUtils.getParentActivityIntent(QuestionBlock.this);
+
+
+        upIntent.putExtra("module", getIntent().getExtras().getInt("module"));
+
+        if (NavUtils.shouldUpRecreateTask(QuestionBlock.this, upIntent)) {
+            // This activity is NOT part of this app's task, so create a new task
+            // when navigating up, with a synthesized back stack.
+            TaskStackBuilder.create(QuestionBlock.this)
+                    // Add all of this activity's parents to the back stack
+                    .addNextIntentWithParentStack(upIntent)
+                    // Navigate up to the closest parent
+                    .startActivities();
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        } else {
+            // This activity is part of this app's task, so simply
+            // navigate up to the logical parent activity.
+            NavUtils.navigateUpTo(QuestionBlock.this, upIntent);
+            // !! Fix these weird and broken animations
+            overridePendingTransition(R.anim.zoom_out, R.anim.zoom_in);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onUpButtonPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v(TAG, "Back button pressed! Omg!");
+        onUpButtonPressed();
     }
 
 }

@@ -1,5 +1,9 @@
 package com.ukie.ukie;
 
+import android.accounts.Account;
+import android.accounts.AccountAuthenticatorActivity;
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -28,11 +32,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.appindexing.builders.PersonBuilder;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,6 +81,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -82,6 +98,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 public class google_login extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
@@ -162,7 +181,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                         //profile,
                         //new DividerDrawerItem(),
                         new PrimaryDrawerItem().withName("Dashboard").withIdentifier(2).withIcon(GoogleMaterial.Icon.gmd_dashboard),
-                        new PrimaryDrawerItem().withName("Exercises").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_fitness_center),
+                        new PrimaryDrawerItem().withName("Modules").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_fitness_center),
                         new PrimaryDrawerItem().withName("Badges").withIdentifier(4).withIcon(GoogleMaterial.Icon.gmd_local_offer),
                         new PrimaryDrawerItem().withName("Friends").withIdentifier(5).withIcon(GoogleMaterial.Icon.gmd_people),
                         new PrimaryDrawerItem().withName("Discussions").withIdentifier(6).withIcon(GoogleMaterial.Icon.gmd_forum),
@@ -174,7 +193,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         TextView textView = (TextView) findViewById(R.id.DText);
-                        textView.setText(String.valueOf(drawerItem.getIdentifier()));
+                        //textView.setText(String.valueOf(drawerItem.getIdentifier()));
                         selectDrawerItem(drawerItem);
                         return false;
                     }
@@ -264,8 +283,39 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
         }
     }
     private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+
+        Log.v(TAG, "Is google connected?" + String.valueOf(mGoogleApiClient.isConnected()));
+        ConnectionResult result = mGoogleApiClient.getConnectionResult(Auth.GOOGLE_SIGN_IN_API);
+
+        Log.v(TAG, "result info:" + result.isSuccess());
+
+        final boolean[] works = {true};
+
+        if (result.isSuccess()) {
+            Log.v(TAG, "In at least");
+            Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient).setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
+                    Log.v(TAG, "Whatya think?" + googleSignInResult.isSuccess());
+                    works[0] = googleSignInResult.isSuccess();
+                    if(works[0]) {
+                        handleSignInResult(googleSignInResult);
+                    }
+                    Log.v(TAG, "Do we ever reach here?");
+                    if(!works[0]) {
+                        Log.v(TAG, "But do we enter it?");
+                        Intent signInIntent1 = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                        Log.v(TAG, "Interesting");
+                        startActivityForResult(signInIntent1, RC_SIGN_IN);
+                    }
+                }
+            });
+        }
+        else {
+            Log.v(TAG, "Google's api is not connected or something, issues abound!");
+            //Intent signInIntent1 = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            //startActivityForResult(signInIntent1, RC_SIGN_IN);
+        }
     }
 
     @Override
@@ -285,6 +335,10 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
+
+            Log.v(TAG, "ID:" + acct.getId());
+            Log.v(TAG, "ID Token:" + acct.getIdToken());
+
             firebaseAuthWithGoogle(acct);
             idToken = acct.getIdToken();
             //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
@@ -292,7 +346,15 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
             Log.d(TAG, "Account profile image url:" + acct.getPhotoUrl());
             //DrawerImageLoader.getInstance().setImage((ImageView) profile.generateView(this), result.getSignInAccount().getPhotoUrl(), "Profile");
 
-            Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
+            updateUI(acct);
+            profile.withName(acct.getDisplayName());
+            profile.withEmail(acct.getEmail());
+            if(acct.getPhotoUrl() != null) {
+                profile.withIcon(acct.getPhotoUrl().toString());
+            }
+            headerResult.updateProfile(profile);
+
+            /*Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
 
             Log.d(TAG, String.valueOf(query));
 
@@ -322,7 +384,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                 public void onCancelled(DatabaseError databaseError) {
                     throw databaseError.toException();
                 }
-            });
+            });*/
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(null);
@@ -372,21 +434,35 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
 
     private void signOut() {
         // Firebase sign out
-        mAuth.signOut();
+        if(mAuth.getCurrentUser() != null) {
+            mAuth.signOut();
+        }
 
-        // Google sign out
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        updateUI(null);
-                    }
-                });
+        Log.v(TAG, "Sign out");
+
+        if(mGoogleApiClient.isConnected()) {
+            // Google sign out
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            updateUI(null);
+                        }
+                    });
+
+            revokeAccess();
+
+            mGoogleApiClient.stopAutoManage(this);
+            mGoogleApiClient.disconnect();
+        }
+
     }
 
     private void revokeAccess() {
         // Firebase sign out
-        mAuth.signOut();
+        if(mAuth.getCurrentUser() != null) {
+            mAuth.signOut();
+        }
 
         // Google revoke access
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient).setResultCallback(
@@ -398,7 +474,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
-    private void updateUI(FirebaseUser user) {
+    private void updateUI(Object user) {
         //hideProgressDialog();
         if (user != null) {
             //mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
@@ -436,7 +512,7 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 break;
             case 3:
-                intent = new Intent(this, Exercises.class);
+                intent = new Intent(this, ModuleActivity.class);
                 startActivity(intent);
                 break;
             case 4:
@@ -472,18 +548,24 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null) {
-            updateUI(currentUser);
-            Log.d(TAG, "User email:" + currentUser.getEmail() + "User ID:" + currentUser.getUid() + "Photo url:" + currentUser.getPhotoUrl());
-            profile.withName(currentUser.getDisplayName());
-            profile.withEmail(currentUser.getEmail());
-            if(currentUser.getPhotoUrl() != null) {
-                profile.withIcon(currentUser.getPhotoUrl().toString());
-            }
-            headerResult.updateProfile(profile);
-            //DrawerImageLoader.getInstance().setImage((ImageView) profile.generateView(this), currentUser.getPhotoUrl(), "Profile");
+            Log.v(TAG, "Connecting..." + String.valueOf(mAuth.getCurrentUser()));
+            if(currentUser != null) {
+                updateUI(currentUser);
 
-            Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
+                Log.v(TAG, "Connected with firebase! Woo!");
+
+                //currentUser.
+                //Log.d(TAG, "User language:" + currentUser.getLanguage() + "User ID:" + currentUser.getId() + "Photo url:" + currentUser.getImage().getUrl());
+                //Log.d(TAG, "User email:" + currentUser. + "User ID:" + currentUser.getUid() + "Photo url:" + currentUser.getPhotoUrl());
+                profile.withName(currentUser.getDisplayName());
+                //profile.withEmail(currentUser.getEmail());
+                if (currentUser.getPhotoUrl() != null) {
+                    profile.withIcon(currentUser.getPhotoUrl());
+                }
+                headerResult.updateProfile(profile);
+                //DrawerImageLoader.getInstance().setImage((ImageView) profile.generateView(this), currentUser.getPhotoUrl(), "Profile");
+
+            /*Query query = FirebaseRef.child("users").orderByChild("uid").equalTo(mAuth.getCurrentUser().getUid());
 
             Log.d(TAG, String.valueOf(query));
 
@@ -513,9 +595,12 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
                 public void onCancelled(DatabaseError databaseError) {
                     throw databaseError.toException();
                 }
-            });
+            });*/
 
-        }
+            }
+            else {
+                Log.v(TAG, "You're not signed in");
+            }
         //Toast.makeText(this, "User email:" + currentUser.getEmail() + "User ID:" + currentUser.getUid() + "Photo url:" + currentUser.getPhotoUrl(), Toast.LENGTH_SHORT).show();
     }
 
@@ -523,6 +608,20 @@ public class google_login extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         mDbHelper.close();
         super.onDestroy();
+
+        mGoogleApiClient.stopAutoManage(this);
+        mGoogleApiClient.disconnect();
+
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        mGoogleApiClient.stopAutoManage(this);
+        mGoogleApiClient.disconnect();
+
     }
 
 }
